@@ -1,0 +1,158 @@
+{
+ "actions": [],
+ "autoname": "format:SUB-{####}",
+ "creation": "2026-09-22 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "user",
+  "problem",
+  "status",
+  "mode",
+  "col_break_1",
+  "score",
+  "total_marks",
+  "passed_testcases",
+  "total_testcases",
+  "execution_time",
+  "section_break_code",
+  "language",
+  "source_code",
+  "section_break_results",
+  "error_message",
+  "testcase_results"
+ ],
+ "fields": [
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "User / Student",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "problem",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Coding Problem",
+   "options": "Coding Problem",
+   "reqd": 1
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Accepted\nWrong Answer\nTime Limit Exceeded\nCompilation Error\nRuntime Error\nForbidden Keyword\nMandatory Construct Missing\nPending"
+  },
+  {
+   "default": "practice",
+   "fieldname": "mode",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Submission Mode",
+   "options": "practice\nexam"
+  },
+  {
+   "fieldname": "col_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0.0",
+   "fieldname": "score",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Score / Marks Awarded"
+  },
+  {
+   "default": "100.0",
+   "fieldname": "total_marks",
+   "fieldtype": "Float",
+   "label": "Total Marks"
+  },
+  {
+   "default": "0",
+   "fieldname": "passed_testcases",
+   "fieldtype": "Int",
+   "label": "Passed Test Cases"
+  },
+  {
+   "default": "0",
+   "fieldname": "total_testcases",
+   "fieldtype": "Int",
+   "label": "Total Test Cases"
+  },
+  {
+   "fieldname": "execution_time",
+   "fieldtype": "Float",
+   "label": "Execution Time (Seconds)"
+  },
+  {
+   "fieldname": "section_break_code",
+   "fieldtype": "Section Break",
+   "label": "Code & Language"
+  },
+  {
+   "fieldname": "language",
+   "fieldtype": "Data",
+   "label": "Programming Language"
+  },
+  {
+   "fieldname": "source_code",
+   "fieldtype": "Code",
+   "label": "Submitted Source Code"
+  },
+  {
+   "fieldname": "section_break_results",
+   "fieldtype": "Section Break",
+   "label": "Detailed Results & Execution Logs"
+  },
+  {
+   "fieldname": "error_message",
+   "fieldtype": "Small Text",
+   "label": "Compiler / Runtime Error Message"
+  },
+  {
+   "fieldname": "testcase_results",
+   "fieldtype": "Code",
+   "label": "Testcase Results (JSON Breakdown)"
+  }
+ ],
+ "links": [],
+ "modified": "2026-09-22 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Coding LMS",
+ "name": "Coding Submission",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Instructor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Student"
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

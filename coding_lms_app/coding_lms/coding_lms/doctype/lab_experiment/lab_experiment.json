@@ -1,0 +1,135 @@
+{
+ "actions": [],
+ "autoname": "format:EXP-{####}",
+ "creation": "2026-09-22 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "experiment_number",
+  "title",
+  "course",
+  "col_break_1",
+  "total_marks",
+  "pre_lab_max_marks",
+  "in_lab_max_marks",
+  "viva_max_marks",
+  "section_break_steps",
+  "pre_lab_problem",
+  "in_lab_problem",
+  "section_break_instructions",
+  "instructions"
+ ],
+ "fields": [
+  {
+   "default": "1",
+   "fieldname": "experiment_number",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Experiment No.",
+   "reqd": 1
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Experiment Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "course",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Course Name / Code",
+   "reqd": 1
+  },
+  {
+   "fieldname": "col_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "100.0",
+   "fieldname": "total_marks",
+   "fieldtype": "Float",
+   "label": "Total Marks"
+  },
+  {
+   "default": "30.0",
+   "fieldname": "pre_lab_max_marks",
+   "fieldtype": "Float",
+   "label": "Pre-Lab Marks"
+  },
+  {
+   "default": "50.0",
+   "fieldname": "in_lab_max_marks",
+   "fieldtype": "Float",
+   "label": "In-Lab Marks"
+  },
+  {
+   "default": "20.0",
+   "fieldname": "viva_max_marks",
+   "fieldtype": "Float",
+   "label": "Viva Marks"
+  },
+  {
+   "fieldname": "section_break_steps",
+   "fieldtype": "Section Break",
+   "label": "Linked Coding Problems"
+  },
+  {
+   "fieldname": "pre_lab_problem",
+   "fieldtype": "Link",
+   "label": "Step 1: Pre-Lab Problem (Self-Paced)",
+   "options": "Coding Problem"
+  },
+  {
+   "fieldname": "in_lab_problem",
+   "fieldtype": "Link",
+   "label": "Step 2: In-Lab Problem (Secure)",
+   "options": "Coding Problem"
+  },
+  {
+   "fieldname": "section_break_instructions",
+   "fieldtype": "Section Break",
+   "label": "Instructions"
+  },
+  {
+   "fieldname": "instructions",
+   "fieldtype": "Text Editor",
+   "label": "Experiment Instructions & Objectives"
+  }
+ ],
+ "links": [],
+ "modified": "2026-09-22 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Coding LMS",
+ "name": "Lab Experiment",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Instructor",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Student"
+  }
+ ],
+ "sort_field": "experiment_number",
+ "sort_order": "ASC",
+ "states": []
+}

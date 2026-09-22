@@ -1,0 +1,126 @@
+{
+ "actions": [],
+ "autoname": "format:PROCTOR-{####}",
+ "creation": "2026-09-22 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "student",
+  "assessment_name",
+  "status",
+  "is_auto_submitted",
+  "col_break_1",
+  "tab_switches",
+  "max_allowed_tab_switches",
+  "fullscreen_violations",
+  "copy_paste_attempts",
+  "section_break_logs",
+  "violation_logs"
+ ],
+ "fields": [
+  {
+   "fieldname": "student",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Student",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "assessment_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Assessment / Exam Name"
+  },
+  {
+   "default": "Ongoing",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Session Status",
+   "options": "Ongoing\nSubmitted\nAuto Submitted on Violation"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_auto_submitted",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Auto-Submitted Due to Violations"
+  },
+  {
+   "fieldname": "col_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "tab_switches",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Tab Switches Count"
+  },
+  {
+   "default": "3",
+   "fieldname": "max_allowed_tab_switches",
+   "fieldtype": "Int",
+   "label": "Max Allowed Tab Switches"
+  },
+  {
+   "default": "0",
+   "fieldname": "fullscreen_violations",
+   "fieldtype": "Int",
+   "label": "Fullscreen Exit Violations"
+  },
+  {
+   "default": "0",
+   "fieldname": "copy_paste_attempts",
+   "fieldtype": "Int",
+   "label": "Copy/Paste Attempts Blocked"
+  },
+  {
+   "fieldname": "section_break_logs",
+   "fieldtype": "Section Break",
+   "label": "Real-time Violation Event Logs"
+  },
+  {
+   "fieldname": "violation_logs",
+   "fieldtype": "Code",
+   "label": "Violation Logs (JSON Array)"
+  }
+ ],
+ "links": [],
+ "modified": "2026-09-22 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Coding LMS",
+ "name": "Proctored Session",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Instructor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Student",
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

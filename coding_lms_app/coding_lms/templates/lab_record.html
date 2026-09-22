@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 12px; color: #333; line-height: 1.5; padding: 20px; }
+  .header { text-align: center; border-bottom: 2px solid #2b6cb0; padding-bottom: 12px; margin-bottom: 20px; }
+  .header h1 { font-size: 18px; margin: 0; color: #2b6cb0; text-transform: uppercase; }
+  .header h2 { font-size: 14px; margin: 5px 0 0 0; color: #4a5568; }
+  .meta-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+  .meta-table td { padding: 6px 10px; border: 1px solid #cbd5e0; }
+  .meta-label { font-weight: bold; width: 25%; background-color: #f7fafc; color: #2d3748; }
+  .section-title { font-size: 13px; font-weight: bold; color: #2b6cb0; text-transform: uppercase; margin: 15px 0 6px 0; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+  .text-box { background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 10px; margin-bottom: 15px; white-space: pre-wrap; }
+  .code-box { background-color: #1a202c; color: #edf2f7; font-family: 'Courier New', Courier, monospace; font-size: 11px; padding: 12px; border-radius: 4px; overflow-x: auto; white-space: pre-wrap; margin-bottom: 15px; }
+  .results-table { width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 20px; }
+  .results-table th, .results-table td { border: 1px solid #cbd5e0; padding: 6px 10px; text-align: left; font-size: 11px; }
+  .results-table th { background-color: #edf2f7; color: #2d3748; }
+  .status-passed { color: #276749; font-weight: bold; }
+  .status-failed { color: #9b2c2c; font-weight: bold; }
+  .footer { margin-top: 30px; border-top: 1px solid #cbd5e0; padding-top: 15px; }
+  .signature-grid { width: 100%; margin-top: 40px; }
+  .signature-grid td { width: 50%; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Laboratory Practical Record</h1>
+  <h2>{{ experiment.course }} &mdash; Experiment {{ experiment.experiment_number }}</h2>
+</div>
+
+<table class="meta-table">
+  <tr>
+    <td class="meta-label">Student Name:</td>
+    <td>{{ student_name }}</td>
+    <td class="meta-label">Roll Number:</td>
+    <td><strong>{{ roll_number }}</strong></td>
+  </tr>
+  <tr>
+    <td class="meta-label">Department:</td>
+    <td>{{ department }}</td>
+    <td class="meta-label">Section / Year:</td>
+    <td>{{ section }} &mdash; {{ year }}</td>
+  </tr>
+  <tr>
+    <td class="meta-label">Experiment Title:</td>
+    <td colspan="3"><strong>{{ experiment.title }}</strong></td>
+  </tr>
+  <tr>
+    <td class="meta-label">Date Submitted:</td>
+    <td colspan="3">{{ submission_date }}</td>
+  </tr>
+</table>
+
+<div class="section-title">1. Aim of the Experiment</div>
+<div class="text-box">{{ aim }}</div>
+
+<div class="section-title">2. Algorithm / Procedure</div>
+<div class="text-box">{{ algorithm }}</div>
+
+<div class="section-title">3. Program Source Code</div>
+<div class="code-box">{{ source_code }}</div>
+
+<div class="section-title">4. Test Case Execution Results</div>
+<table class="results-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Test Case Label</th>
+      <th>Status</th>
+      <th>Execution Time</th>
+      <th>Score Awarded</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for tc in testcase_results %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ tc.description }}</td>
+      <td class="{{ 'status-passed' if tc.status == 'passed' else 'status-failed' }}">{{ tc.status | upper }}</td>
+      <td>{{ tc.execution_time or '0.00s' }}</td>
+      <td>{{ tc.weightage if tc.status == 'passed' else 0 }} Marks</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="section-title">5. Conclusion</div>
+<div class="text-box">{{ conclusion }}</div>
+
+<div class="footer">
+  <table class="signature-grid">
+    <tr>
+      <td>
+        <div style="border-top: 1px dashed #718096; width: 60%; margin: 0 auto 5px auto;"></div>
+        Student Signature
+      </td>
+      <td>
+        <div style="border-top: 1px dashed #718096; width: 60%; margin: 0 auto 5px auto;"></div>
+        Faculty / Evaluator Signature
+      </td>
+    </tr>
+  </table>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,229 @@
+{
+ "actions": [],
+ "autoname": "format:LAB-SUB-{####}",
+ "creation": "2026-09-22 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "student",
+  "roll_number",
+  "section",
+  "department",
+  "year",
+  "col_break_1",
+  "experiment",
+  "status",
+  "final_total_score",
+  "generated_pdf",
+  "section_break_student_writeup",
+  "aim",
+  "algorithm",
+  "conclusion",
+  "section_break_scores",
+  "pre_lab_submission",
+  "pre_lab_auto_score",
+  "pre_lab_final_score",
+  "col_break_inlab",
+  "in_lab_submission",
+  "in_lab_auto_score",
+  "in_lab_final_score",
+  "section_break_viva",
+  "viva_score",
+  "teacher_feedback",
+  "evaluated_by",
+  "evaluated_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "student",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Student",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "roll_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Roll No."
+  },
+  {
+   "fieldname": "section",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Section",
+   "reqd": 1
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Data",
+   "label": "Department"
+  },
+  {
+   "fieldname": "year",
+   "fieldtype": "Data",
+   "label": "Academic Year"
+  },
+  {
+   "fieldname": "col_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "experiment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Lab Experiment",
+   "options": "Lab Experiment",
+   "reqd": 1
+  },
+  {
+   "default": "Pre-Lab Completed",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Pre-Lab Completed\nIn-Lab Submitted\nEvaluated"
+  },
+  {
+   "default": "0.0",
+   "fieldname": "final_total_score",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Final Score (Pre+In+Viva)"
+  },
+  {
+   "fieldname": "generated_pdf",
+   "fieldtype": "Attach",
+   "label": "Generated PDF Lab Record"
+  },
+  {
+   "fieldname": "section_break_student_writeup",
+   "fieldtype": "Section Break",
+   "label": "In-Lab Student Write-Up"
+  },
+  {
+   "fieldname": "aim",
+   "fieldtype": "Small Text",
+   "label": "Aim"
+  },
+  {
+   "fieldname": "algorithm",
+   "fieldtype": "Text",
+   "label": "Algorithm / Procedure"
+  },
+  {
+   "fieldname": "conclusion",
+   "fieldtype": "Small Text",
+   "label": "Conclusion"
+  },
+  {
+   "fieldname": "section_break_scores",
+   "fieldtype": "Section Break",
+   "label": "Step 1 & Step 2 Scores (Auto vs Override)"
+  },
+  {
+   "fieldname": "pre_lab_submission",
+   "fieldtype": "Link",
+   "label": "Pre-Lab Submission Link",
+   "options": "Coding Submission"
+  },
+  {
+   "default": "0.0",
+   "fieldname": "pre_lab_auto_score",
+   "fieldtype": "Float",
+   "label": "Pre-Lab Auto Score"
+  },
+  {
+   "default": "0.0",
+   "fieldname": "pre_lab_final_score",
+   "fieldtype": "Float",
+   "label": "Pre-Lab Final Score (Teacher Overridable)"
+  },
+  {
+   "fieldname": "col_break_inlab",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "in_lab_submission",
+   "fieldtype": "Link",
+   "label": "In-Lab Submission Link",
+   "options": "Coding Submission"
+  },
+  {
+   "default": "0.0",
+   "fieldname": "in_lab_auto_score",
+   "fieldtype": "Float",
+   "label": "In-Lab Auto Score"
+  },
+  {
+   "default": "0.0",
+   "fieldname": "in_lab_final_score",
+   "fieldtype": "Float",
+   "label": "In-Lab Final Score (Teacher Overridable)"
+  },
+  {
+   "fieldname": "section_break_viva",
+   "fieldtype": "Section Break",
+   "label": "Step 3: Post-Lab Viva & Review"
+  },
+  {
+   "default": "0.0",
+   "fieldname": "viva_score",
+   "fieldtype": "Float",
+   "label": "Viva Marks"
+  },
+  {
+   "fieldname": "teacher_feedback",
+   "fieldtype": "Small Text",
+   "label": "Teacher Feedback / Comments"
+  },
+  {
+   "fieldname": "evaluated_by",
+   "fieldtype": "Link",
+   "label": "Evaluated By",
+   "options": "User"
+  },
+  {
+   "fieldname": "evaluated_at",
+   "fieldtype": "Datetime",
+   "label": "Evaluated At"
+  }
+ ],
+ "links": [],
+ "modified": "2026-09-22 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Coding LMS",
+ "name": "Lab Submission",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Instructor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Student",
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,144 @@
+{
+ "actions": [],
+ "creation": "2026-09-22 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "description",
+  "is_public",
+  "weightage",
+  "col_break_1",
+  "allow_empty_input",
+  "mode",
+  "section_break_io",
+  "input",
+  "expected_output",
+  "section_break_regex",
+  "expected_regex",
+  "match_mode",
+  "col_break_regex",
+  "regex_flags",
+  "section_break_normalizers",
+  "ignore_space",
+  "ignore_case",
+  "col_break_norm",
+  "numeric_tolerance"
+ ],
+ "fields": [
+  {
+   "fieldname": "description",
+   "fieldtype": "Data",
+   "label": "Description / Label"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_public",
+   "fieldtype": "Check",
+   "label": "Is Public / Visible to Student"
+  },
+  {
+   "default": "10.0",
+   "fieldname": "weightage",
+   "fieldtype": "Float",
+   "label": "Weightage / Marks"
+  },
+  {
+   "fieldname": "col_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_empty_input",
+   "fieldtype": "Check",
+   "label": "Allow Empty Input"
+  },
+  {
+   "default": "normal",
+   "fieldname": "mode",
+   "fieldtype": "Select",
+   "label": "Evaluation Mode",
+   "options": "normal\nregex"
+  },
+  {
+   "fieldname": "section_break_io",
+   "fieldtype": "Section Break",
+   "label": "Standard Input / Output"
+  },
+  {
+   "fieldname": "input",
+   "fieldtype": "Code",
+   "label": "Standard Input (stdin)"
+  },
+  {
+   "fieldname": "expected_output",
+   "fieldtype": "Code",
+   "label": "Expected Output (stdout)"
+  },
+  {
+   "fieldname": "section_break_regex",
+   "fieldtype": "Section Break",
+   "label": "Regex Matching"
+  },
+  {
+   "fieldname": "expected_regex",
+   "fieldtype": "Code",
+   "label": "Expected Regex Pattern"
+  },
+  {
+   "default": "fullmatch",
+   "fieldname": "match_mode",
+   "fieldtype": "Select",
+   "label": "Regex Match Mode",
+   "options": "fullmatch\nsearch\nmatch"
+  },
+  {
+   "fieldname": "col_break_regex",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "regex_flags",
+   "fieldtype": "Data",
+   "label": "Regex Flags (e.g. IGNORECASE, MULTILINE)"
+  },
+  {
+   "fieldname": "section_break_normalizers",
+   "fieldtype": "Section Break",
+   "label": "Tolerances & Normalizers"
+  },
+  {
+   "default": "1",
+   "fieldname": "ignore_space",
+   "fieldtype": "Check",
+   "label": "Ignore Trailing Whitespace"
+  },
+  {
+   "default": "0",
+   "fieldname": "ignore_case",
+   "fieldtype": "Check",
+   "label": "Ignore Case"
+  },
+  {
+   "fieldname": "col_break_norm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0.0",
+   "fieldname": "numeric_tolerance",
+   "fieldtype": "Float",
+   "label": "Numeric Tolerance (Floating Point)"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-09-22 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Coding LMS",
+ "name": "Coding Testcase",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": []
+}

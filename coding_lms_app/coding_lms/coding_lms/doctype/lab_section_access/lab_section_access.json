@@ -1,0 +1,101 @@
+{
+ "actions": [],
+ "autoname": "format:SEC-ACC-{####}",
+ "creation": "2026-09-22 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "experiment",
+  "section",
+  "department",
+  "col_break_1",
+  "is_unlocked",
+  "access_password",
+  "instructor",
+  "unlocked_at"
+ ],
+ "fields": [
+  {
+   "fieldname": "experiment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Lab Experiment",
+   "options": "Lab Experiment",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Section / Batch Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Department"
+  },
+  {
+   "fieldname": "col_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_unlocked",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "In-Lab Unlocked"
+  },
+  {
+   "fieldname": "access_password",
+   "fieldtype": "Data",
+   "label": "Access Password"
+  },
+  {
+   "fieldname": "instructor",
+   "fieldtype": "Link",
+   "label": "Assigned Instructor",
+   "options": "User"
+  },
+  {
+   "fieldname": "unlocked_at",
+   "fieldtype": "Datetime",
+   "label": "Unlocked At"
+  }
+ ],
+ "links": [],
+ "modified": "2026-09-22 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Coding LMS",
+ "name": "Lab Section Access",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Instructor",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Student"
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

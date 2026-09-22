@@ -1,0 +1,211 @@
+{
+ "actions": [],
+ "autoname": "format:PROB-{####}",
+ "creation": "2026-09-22 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "question_bank",
+  "difficulty",
+  "language",
+  "col_break_1",
+  "timer",
+  "time_limit",
+  "memory_limit",
+  "section_break_problem",
+  "content",
+  "input_format",
+  "output_format",
+  "col_break_details",
+  "constraints",
+  "expected_time_complexity",
+  "expected_space_complexity",
+  "section_break_snippets",
+  "starter_code",
+  "skeleton_code",
+  "solution_code",
+  "section_break_keywords",
+  "blacklist_keywords",
+  "whitelist_keywords",
+  "section_break_testcases",
+  "testcases"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Problem Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "question_bank",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Question Bank",
+   "options": "Coding Question Bank"
+  },
+  {
+   "default": "Medium",
+   "fieldname": "difficulty",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Difficulty",
+   "options": "Easy\nMedium\nHard"
+  },
+  {
+   "default": "python",
+   "fieldname": "language",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Primary Language",
+   "options": "python\ncpp\nc\njava\njavascript"
+  },
+  {
+   "fieldname": "col_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "timer",
+   "fieldtype": "Int",
+   "label": "Suggested Timer (Minutes)"
+  },
+  {
+   "default": "2.0",
+   "fieldname": "time_limit",
+   "fieldtype": "Float",
+   "label": "CPU Time Limit (Seconds)"
+  },
+  {
+   "default": "256",
+   "fieldname": "memory_limit",
+   "fieldtype": "Int",
+   "label": "Memory Limit (MB)"
+  },
+  {
+   "fieldname": "section_break_problem",
+   "fieldtype": "Section Break",
+   "label": "Problem Description & Formats"
+  },
+  {
+   "fieldname": "content",
+   "fieldtype": "Text Editor",
+   "label": "Problem Statement (Markdown / HTML)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "input_format",
+   "fieldtype": "Small Text",
+   "label": "Input Format"
+  },
+  {
+   "fieldname": "output_format",
+   "fieldtype": "Small Text",
+   "label": "Output Format"
+  },
+  {
+   "fieldname": "col_break_details",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "constraints",
+   "fieldtype": "Small Text",
+   "label": "Constraints"
+  },
+  {
+   "fieldname": "expected_time_complexity",
+   "fieldtype": "Data",
+   "label": "Expected Time Complexity (e.g. O(N))"
+  },
+  {
+   "fieldname": "expected_space_complexity",
+   "fieldtype": "Data",
+   "label": "Expected Space Complexity (e.g. O(1))"
+  },
+  {
+   "fieldname": "section_break_snippets",
+   "fieldtype": "Section Break",
+   "label": "Code Snippets"
+  },
+  {
+   "fieldname": "starter_code",
+   "fieldtype": "Code",
+   "label": "Starter Code Template (For Student)"
+  },
+  {
+   "fieldname": "skeleton_code",
+   "fieldtype": "Code",
+   "label": "Skeleton Code (Optional Function Signature)"
+  },
+  {
+   "fieldname": "solution_code",
+   "fieldtype": "Code",
+   "label": "Reference Solution Code (For Output Auto-Generation)"
+  },
+  {
+   "fieldname": "section_break_keywords",
+   "fieldtype": "Section Break",
+   "label": "Keyword Constraints (Whitelist & Blacklist)"
+  },
+  {
+   "fieldname": "blacklist_keywords",
+   "fieldtype": "Data",
+   "label": "Blacklist Keywords (Comma-separated forbidden words/functions)"
+  },
+  {
+   "fieldname": "whitelist_keywords",
+   "fieldtype": "Data",
+   "label": "Whitelist Keywords (Comma-separated mandatory constructs)"
+  },
+  {
+   "fieldname": "section_break_testcases",
+   "fieldtype": "Section Break",
+   "label": "Test Cases"
+  },
+  {
+   "fieldname": "testcases",
+   "fieldtype": "Table",
+   "label": "Problem Test Cases",
+   "options": "Coding Testcase"
+  }
+ ],
+ "links": [],
+ "modified": "2026-09-22 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Coding LMS",
+ "name": "Coding Problem",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Instructor",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Student"
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

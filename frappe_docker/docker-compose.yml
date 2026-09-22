@@ -1,0 +1,43 @@
+﻿services:
+  mariadb:
+    image: mariadb:10.6
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+    environment:
+      MYSQL_ROOT_PASSWORD: 123
+      MARIADB_AUTO_UPGRADE: 1
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    restart: always
+
+  redis-cache:
+    image: redis:alpine
+    restart: always
+
+  redis-queue:
+    image: redis:alpine
+    restart: always
+
+  frappe:
+    image: frappe/bench:latest
+    command: sleep infinity
+    environment:
+      - SHELL=/bin/bash
+    ports:
+      - "8000:8000"
+      - "9002:9000"
+    volumes:
+      - ..:/workspace:cached
+      - frappe-bench-data:/home/frappe/frappe-bench
+    working_dir: /home/frappe
+    depends_on:
+      - mariadb
+      - redis-cache
+      - redis-queue
+    restart: always
+
+volumes:
+  mariadb-data:
+  frappe-bench-data:

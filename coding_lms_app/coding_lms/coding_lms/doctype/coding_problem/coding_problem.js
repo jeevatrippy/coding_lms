@@ -27,7 +27,7 @@ frappe.ui.form.on('Coding Problem', {
     }
 });
 
-const MASTER_AI_PROMPT = "You are an expert competitive programming problem architect and JSON generator for an online Judge0 coding platform.\n\nI will provide input in one of two formats:\n- FORMAT A: Just the problem title and description.\n- FORMAT B: Problem title, description, code snippets, skeleton, and test cases.\n\nYour task is to return ONLY a single, valid, raw JSON object (strictly NO markdown backticks, NO markdown formatting around the JSON, NO explanations, NO introductory or concluding text).\n\n### APPROACH A vs APPROACH B (STUDENT CODE EDITOR MODES):\n1. APPROACH A (Competitive Programming / Full Boilerplate):\n   - The student sees \"starter_code\" containing the complete file (imports, function stub, and main() driver reading stdin and printing stdout).\n   - Use this when testing I/O handling, low-level pointers, or full program compilation.\n2. APPROACH B (LeetCode / Function-Only Mode):\n   - The student sees \"skeleton_code\" containing ONLY the clean function or class signature (no main, no scanf/cin, no print).\n   - Behind the scenes, the driver wraps this function when submitting to Judge0.\n   - Use this for algorithmic puzzles, LeetCode style problems, and clean logic evaluations.\n\n### STRICT JSON SYNTAX RULES:\n1. Double Quotes Inside Code: Any double quotes inside string fields (like printf(\\\"%d\\\"), scanf(\\\"%d %d\\\"), puts(\\\"\\\"), print(\\\"Hello\\\")) MUST BE STRICTLY ESCAPED AS \\\\\". Never leave unescaped raw double quotes inside JSON code strings.\n2. C Null Terminator: In C strings, write null terminator as '\\\\\\\\0' (double backslash), not '\\\\0'.\n3. Newlines and Tabs: Encode newlines as \\\\n and tabs as \\\\t.\n4. Regex Output: Whenever an output has formatted labels, prefixes, or punctuation (e.g. 'Sum: 40', 'Status: OK'), set mode='regex', expected_regex='^Label:\\\\\\\\s*pattern$', and match_mode='fullmatch'.\n\n### STRICT JSON OUTPUT SCHEMA:\n{\n  \"title\": \"<Problem Title>\",\n  \"difficulty\": \"<Easy | Medium | Hard>\",\n  \"language\": \"<python | java | cpp | c | javascript | typescript | go | rust | csharp | php | ruby | kotlin | swift | sql | bash>\",\n  \"code_editor_mode\": \"<Competitive Mode (Full Code with main & stdin) | LeetCode Mode (Pure Function Signature only)>\",\n  \"timer\": 20,\n  \"time_limit\": 2.0,\n  \"memory_limit\": 256,\n  \"content\": \"<Problem statement in clean Markdown with rules and examples>\",\n  \"input_format\": \"<Explanation of standard input lines>\",\n  \"output_format\": \"<Explanation of expected standard output>\",\n  \"constraints\": \"<Mathematical bounds, e.g. 1 <= N <= 10^5>\",\n  \"expected_time_complexity\": \"<e.g. O(N)>\",\n  \"expected_space_complexity\": \"<e.g. O(1)>\",\n  \"skeleton_code\": \"<Pure function signature only (Approach B / LeetCode style)>\",\n  \"starter_code\": \"<Full runnable code with main() and stdin/stdout (Approach A / Competitive style)>\",\n  \"solution_code\": \"<Complete optimal solution that compiles and passes in Judge0>\",\n  \"whitelist_keywords\": \"<Optional comma-separated mandatory constructs, or empty>\",\n  \"blacklist_keywords\": \"<Optional comma-separated forbidden words like 'eval, exec', or empty>\",\n  \"testcases\": [\n    {\n      \"description\": \"<Label for testcase>\",\n      \"input\": \"<stdin string with \\\\n for newlines>\",\n      \"expected_output\": \"<stdout string for normal mode, or empty string if regex>\",\n      \"weightage\": 20,\n      \"is_public\": 1,\n      \"allow_empty_input\": 0,\n      \"mode\": \"<normal | regex>\",\n      \"expected_regex\": \"<regex pattern if mode is regex, otherwise empty string>\",\n      \"match_mode\": \"<fullmatch | search>\",\n      \"regex_flags\": \"<IGNORECASE | MULTILINE | ''>\",\n      \"ignore_space\": 1,\n      \"ignore_case\": 0,\n      \"numeric_tolerance\": 0.0\n    }\n  ]\n}";
+const MASTER_AI_PROMPT = "You are an expert competitive programming problem architect and JSON generator for an online coding assessment platform.\n\nI will provide input in one of two formats:\n- FORMAT A: Just the problem title and description.\n- FORMAT B: Problem title, description, code snippets, skeleton, and test cases.\n\nYour task is to return ONLY a single, valid, raw JSON object (strictly NO markdown backticks, NO markdown formatting around the JSON, NO explanations, NO introductory or concluding text).\n\n### APPROACH A vs APPROACH B (STUDENT CODE EDITOR MODES):\n1. APPROACH A (Competitive Programming / Full Boilerplate):\n   - The student sees \"starter_code\" containing the complete file (imports, function stub, and main() driver reading stdin and printing stdout).\n   - Use this when testing I/O handling, low-level pointers, or full program compilation.\n2. APPROACH B (LeetCode / Function-Only Mode):\n   - The student sees \"skeleton_code\" containing ONLY the clean function or class signature (no main, no scanf/cin, no print).\n   - Behind the scenes, the driver wraps this function when submitting to compiler sandbox.\n   - Use this for algorithmic puzzles, LeetCode style problems, and clean logic evaluations.\n\n### STRICT JSON SYNTAX RULES:\n1. Double Quotes Inside Code: Any double quotes inside string fields (like printf(\\\"%d\\\"), scanf(\\\"%d %d\\\"), puts(\\\"\\\"), print(\\\"Hello\\\")) MUST BE STRICTLY ESCAPED AS \\\\\". Never leave unescaped raw double quotes inside JSON code strings.\n2. C Null Terminator: In C strings, write null terminator as '\\\\\\\\0' (double backslash), not '\\\\0'.\n3. Newlines and Tabs: Encode newlines as \\\\n and tabs as \\\\t.\n4. Regex Output: Whenever an output has formatted labels, prefixes, or punctuation (e.g. 'Sum: 40', 'Status: OK'), set mode='regex', expected_regex='^Label:\\\\\\\\s*pattern$', and match_mode='fullmatch'.\n\n### STRICT JSON OUTPUT SCHEMA:\n{\n  \"title\": \"<Problem Title>\",\n  \"difficulty\": \"<Easy | Medium | Hard>\",\n  \"language\": \"<python | java | cpp | c | javascript | typescript | go | rust | csharp | php | ruby | kotlin | swift | sql | bash>\",\n  \"code_editor_mode\": \"<Competitive Mode (Full Code with main & stdin) | LeetCode Mode (Pure Function Signature only)>\",\n  \"timer\": 20,\n  \"time_limit\": 2.0,\n  \"memory_limit\": 256,\n  \"content\": \"<Problem statement in clean Markdown with rules and examples>\",\n  \"input_format\": \"<Explanation of standard input lines>\",\n  \"output_format\": \"<Explanation of expected standard output>\",\n  \"constraints\": \"<Mathematical bounds, e.g. 1 <= N <= 10^5>\",\n  \"expected_time_complexity\": \"<e.g. O(N)>\",\n  \"expected_space_complexity\": \"<e.g. O(1)>\",\n  \"skeleton_code\": \"<Pure function signature only (Approach B / LeetCode style)>\",\n  \"starter_code\": \"<Full runnable code with main() and stdin/stdout (Approach A / Competitive style)>\",\n  \"solution_code\": \"<Complete optimal solution that compiles and passes in Judge0>\",\n  \"whitelist_keywords\": \"<Optional comma-separated mandatory constructs, or empty>\",\n  \"blacklist_keywords\": \"<Optional comma-separated forbidden words like 'eval, exec', or empty>\",\n  \"testcases\": [\n    {\n      \"description\": \"<Label for testcase>\",\n      \"input\": \"<stdin string with \\\\n for newlines>\",\n      \"expected_output\": \"<stdout string for normal mode, or empty string if regex>\",\n      \"weightage\": 20,\n      \"is_public\": 1,\n      \"allow_empty_input\": 0,\n      \"mode\": \"<normal | regex>\",\n      \"expected_regex\": \"<regex pattern if mode is regex, otherwise empty string>\",\n      \"match_mode\": \"<fullmatch | search>\",\n      \"regex_flags\": \"<IGNORECASE | MULTILINE | ''>\",\n      \"ignore_space\": 1,\n      \"ignore_case\": 0,\n      \"numeric_tolerance\": 0.0\n    }\n  ]\n}";
 
 function copy_ai_prompt_to_clipboard() {
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -373,7 +373,7 @@ function run_problem_test_suite(frm) {
         return;
     }
 
-    frappe.dom.freeze(__('Submitting solution to Judge0 sandbox across ' + tcs.length + ' test cases...'));
+    frappe.dom.freeze(__('Submitting solution to execution sandbox across ' + tcs.length + ' test cases...'));
 
     frappe.call({
         method: 'coding_lms.api.evaluator.test_problem_draft',
@@ -426,7 +426,7 @@ function render_test_results_dialog(frm, res) {
                     ${icon} ` + (passed ? 'All ' + res.passed_count + '/' + res.total_testcases + ' Test Cases PASSED!' : res.passed_count + '/' + res.total_testcases + ' Test Cases Passed') + `
                 </h4>
                 <p style="margin: 4px 0 0 0; font-size: 13px; opacity: 0.9;">
-                    Compiler: Judge0 Sandboxed Execution &bull; Language: ${frappe_escape(frm.doc.language || 'c')}
+                    Sandbox Execution Engine &bull; Language: ${frappe_escape(frm.doc.language || 'c')}
                 </p>
             </div>
             <div>
@@ -442,7 +442,7 @@ function render_test_results_dialog(frm, res) {
             <div style="background-color: #fff5f5; border: 1px solid #feb2b2; border-left: 5px solid #e53e3e; border-radius: 6px; padding: 14px 16px; margin-bottom: 16px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
                     <span style="font-weight: 700; color: #9b2c2c; font-size: 13.5px;">
-                        &#9888; Compilation / Build Error (GCC / Clang Output)
+                        &#9888; Compilation / Build Error Diagnostics
                     </span>
                     <span class="badge badge-danger" style="font-size: 10.5px; padding: 3px 8px;">BUILD FAILED</span>
                 </div>
@@ -474,12 +474,11 @@ function render_test_results_dialog(frm, res) {
             <table class="table table-bordered table-hover" style="font-size: 12px; margin-bottom: 0;">
                 <thead style="background: #f8f9fa;">
                     <tr>
-                        <th style="width: 45px; text-align: center;">#</th>
-                        <th style="min-width: 140px;">Description / Mode</th>
-                        <th style="width: 120px; text-align: center;">Status</th>
-                        <th style="width: 75px; text-align: center;">Time</th>
-                        <th style="width: 85px; text-align: center;">Memory</th>
-                        <th style="min-width: 250px;">Actual Output (stdout) & Errors</th>
+                        <th style="width: 40px; text-align: center;">#</th>
+                        <th style="width: 220px;">Test Case & Input (stdin)</th>
+                        <th style="width: 100px; text-align: center;">Status</th>
+                        <th style="width: 85px; text-align: center;">Time / RAM</th>
+                        <th style="min-width: 260px;">Output & Verification</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -497,26 +496,37 @@ function render_test_results_dialog(frm, res) {
             badge_class = 'badge-secondary';
         }
 
-        const expected_label = r.mode === 'regex' ? 'Regex: ' + (r.expected_regex || '(none)') : 'Expected: ' + (r.expected_output || '(blank)');
+        const expected_prefix = (r.mode === 'regex') ? 'Expected Pattern (Regex)' : 'Expected Output';
+        const expected_val = (r.mode === 'regex') ? (r.expected_regex || '(none)') : (r.expected_output || '(blank)');
         
         html += `
             <tr style="${!r.passed ? 'background-color: #fff8f8;' : ''}">
-                <td style="text-align: center;"><strong>${r.index}</strong></td>
-                <td>
+                <td style="text-align: center; vertical-align: top;"><strong>${r.index}</strong></td>
+                <td style="vertical-align: top;">
                     <div style="font-weight: 600; color: #2d3748;">` + frappe_escape(r.description) + `</div>
-                    <div style="color: #718096; font-size: 11px; margin-top: 2px;">
+                    <div style="color: #718096; font-size: 10.5px; margin-top: 2px;">
                         Mode: <span class="badge badge-light" style="border: 1px solid #cbd5e0; font-size: 10px;">${frappe_escape(r.mode.toUpperCase())}</span>
                     </div>
+                    <div style="margin-top: 6px;">
+                        <div style="font-size: 10px; font-weight: 700; color: #4a5568;">INPUT (stdin):</div>
+                        ` + (r.input ? `
+                            <pre style="margin: 2px 0 0 0; padding: 4px 6px; font-size: 11px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; max-height: 75px; overflow-y: auto; white-space: pre-wrap; font-family: monospace;">` + frappe_escape(r.input) + `</pre>
+                        ` : `
+                            <div style="font-size: 10.5px; color: #a0aec0; font-style: italic; margin-top: 2px;">(no stdin input)</div>
+                        `) + `
+                    </div>
                 </td>
-                <td style="text-align: center;">
+                <td style="text-align: center; vertical-align: top;">
                     <span class="badge ${badge_class}" style="font-size: 11px; padding: 4px 8px;">${frappe_escape(r.status)}</span>
                 </td>
-                <td style="font-family: monospace; text-align: center;">${r.time}</td>
-                <td style="font-family: monospace; text-align: center;">${r.memory}</td>
-                <td>
+                <td style="font-family: monospace; text-align: center; vertical-align: top; font-size: 11px;">
+                    <div>${r.time}</div>
+                    <div style="color: #718096; font-size: 10px; margin-top: 2px;">${r.memory}</div>
+                </td>
+                <td style="vertical-align: top;">
                     ${r.actual_output ? `
-                        <div style="font-size: 10px; font-weight: bold; color: #4a5568; margin-bottom: 2px;">STDOUT:</div>
-                        <pre style="margin: 0 0 6px 0; padding: 6px 8px; font-size: 11px; background: #fdfdfd; border: 1px solid #e2e8f0; border-radius: 4px; max-height: 90px; overflow-y: auto; white-space: pre-wrap;">` + frappe_escape(r.actual_output) + `</pre>
+                        <div style="font-size: 10px; font-weight: 700; color: #4a5568; margin-bottom: 2px;">ACTUAL OUTPUT (stdout):</div>
+                        <pre style="margin: 0 0 6px 0; padding: 6px 8px; font-size: 11px; background: #fdfdfd; border: 1px solid #e2e8f0; border-radius: 4px; max-height: 90px; overflow-y: auto; white-space: pre-wrap; font-family: monospace;">` + frappe_escape(r.actual_output) + `</pre>
                     ` : (has_compile_err ? `
                         <div style="color: #a0aec0; font-style: italic; font-size: 11px; margin-bottom: 4px;">(No stdout: compilation failed)</div>
                     ` : `
@@ -525,13 +535,13 @@ function render_test_results_dialog(frm, res) {
                     
                     ${r.error ? `
                         <div style="margin: 4px 0; padding: 6px 8px; background: #fff5f5; border: 1px solid #feb2b2; border-radius: 4px;">
-                            <div style="font-size: 10px; font-weight: bold; color: #9b2c2c;">ERROR / STDERR:</div>
-                            <pre style="margin: 2px 0 0 0; padding: 0; background: transparent; border: none; font-size: 11px; color: #9b2c2c; max-height: 120px; overflow-y: auto; white-space: pre-wrap; font-family: monospace;">` + frappe_escape(r.error) + `</pre>
+                            <div style="font-size: 10px; font-weight: 700; color: #9b2c2c;">ERROR / STDERR:</div>
+                            <pre style="margin: 2px 0 0 0; padding: 0; background: transparent; border: none; font-size: 11px; color: #9b2c2c; max-height: 100px; overflow-y: auto; white-space: pre-wrap; font-family: monospace;">` + frappe_escape(r.error) + `</pre>
                         </div>
                     ` : ''}
                     
-                    <div style="font-size: 10.5px; color: #718096; margin-top: 4px;">
-                        <strong>Expected:</strong> <code style="font-size: 11px; background: #edf2f7; color: #2d3748; padding: 2px 5px; border-radius: 3px;">` + frappe_escape(expected_label) + `</code>
+                    <div style="font-size: 10.5px; color: #4a5568; margin-top: 4px;">
+                        <strong>${expected_prefix}:</strong> <code style="font-size: 11px; background: #edf2f7; color: #2d3748; padding: 2px 5px; border-radius: 3px; white-space: pre-wrap; word-break: break-all;">` + frappe_escape(expected_val) + `</code>
                     </div>
                 </td>
             </tr>
@@ -545,7 +555,7 @@ function render_test_results_dialog(frm, res) {
     `;
 
     const d = new frappe.ui.Dialog({
-        title: __('Problem Execution Verification (Judge0)'),
+        title: __('Problem Execution Verification'),
         fields: [
             {
                 fieldname: 'results_html',
@@ -558,7 +568,7 @@ function render_test_results_dialog(frm, res) {
 
     const has_blank = res.results.some(r => r.is_blank_expected && r.actual_output);
     if (has_blank) {
-        d.set_primary_action(__('Fill Blank Expected Outputs with Judge0 Results'), function() {
+        d.set_primary_action(__('Fill Blank Expected Outputs with Execution Results'), function() {
             res.results.forEach((r, idx) => {
                 if (r.is_blank_expected && r.actual_output && frm.doc.testcases[idx]) {
                     if (r.mode === 'regex') {

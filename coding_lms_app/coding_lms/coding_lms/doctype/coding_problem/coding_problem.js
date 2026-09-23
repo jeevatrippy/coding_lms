@@ -216,15 +216,22 @@ function open_json_import_dialog(frm) {
         primary_action_label: __('Import & Populate Form'),
         primary_action: function(values) {
             let data;
+            let auto_repaired = false;
             try {
                 data = JSON.parse(values.json_data);
-            } catch (e) {
-                frappe.msgprint({
-                    title: __('Invalid JSON'),
-                    indicator: 'red',
-                    message: __('Could not parse JSON: ' + e.message)
-                });
-                return;
+            } catch (e1) {
+                try {
+                    const repaired = repair_json_text(values.json_data);
+                    data = JSON.parse(repaired);
+                    auto_repaired = true;
+                } catch (e2) {
+                    frappe.msgprint({
+                        title: __('Invalid JSON Format'),
+                        indicator: 'red',
+                        message: __('Could not parse JSON: ' + e1.message + '<br><br><b>Tip:</b> If your code contains double quotes (like <code>scanf("%s")</code>), they must be escaped as <code>\\"</code>.')
+                    });
+                    return;
+                }
             }
 
             // Populate form fields
@@ -463,4 +470,29 @@ function auto_generate_testcase_outputs(frm) {
         return;
     }
     run_problem_test_suite(frm);
+}
+
+
+function clean_inner_quotes(val) {
+    return val.replace(/\\"/g, '___ESCAPED_QUOTE___')
+              .replace(/"/g, '\\"')
+              .replace(/___ESCAPED_QUOTE___/g, '\\"');
+}
+
+function repair_json_text(text) {
+    if (!text) return text;
+    // 1. Fix unescaped \0 (null byte in C strings)
+    let s = text.replace(/\\\\0/g, '___ESCAPED_NULL___')
+                .replace(/\\0/g, '\\\\0')
+                .replace(/___ESCAPED_NULL___/g, '\\\\0');
+
+    // 2. Fix unescaped double quotes inside code and text fields
+    const fields = ['starter_code', 'solution_code', 'skeleton_code', 'content'];
+    fields.forEach(f => {
+        const pattern = new RegExp('("' + f + '"\\s*:\\s*")(.*?)("(?=\\s*,\\s*"[a-zA-Z0-9_]+"\\s*:))', 'gs');
+        s = s.replace(pattern, (match, prefix, val, suffix) => {
+            return prefix + clean_inner_quotes(val) + suffix;
+        });
+    });
+    return s;
 }

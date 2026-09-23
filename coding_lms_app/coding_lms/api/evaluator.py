@@ -1,6 +1,59 @@
 import re
+import json
 import frappe
 from coding_lms.api.judge0_client import submit_to_judge0
+
+def verify_testcase_match(tc, stdout: str) -> bool:
+    """Helper to verify testcase output matching (exact, tolerance, or regex)."""
+    mode = getattr(tc, "mode", None) or (tc.get("mode") if isinstance(tc, dict) else "normal")
+    
+    if mode == "regex":
+        exp_regex = getattr(tc, "expected_regex", None) or (tc.get("expected_regex") if isinstance(tc, dict) else "")
+        if not exp_regex:
+            return True
+        flags = 0
+        f_str = (getattr(tc, "regex_flags", None) or (tc.get("regex_flags") if isinstance(tc, dict) else "") or "").upper()
+        if "IGNORECASE" in f_str:
+            flags |= re.IGNORECASE
+        if "MULTILINE" in f_str:
+            flags |= re.MULTILINE
+        
+        match_mode = getattr(tc, "match_mode", None) or (tc.get("match_mode") if isinstance(tc, dict) else "fullmatch")
+        try:
+            pattern = re.compile(exp_regex.strip(), flags)
+            if match_mode == "search":
+                return bool(pattern.search(stdout))
+            return bool(pattern.fullmatch(stdout))
+        except re.error:
+            return False
+    else:
+        expected = getattr(tc, "expected_output", None) or (tc.get("expected_output") if isinstance(tc, dict) else "") or ""
+        actual_comp = stdout.rstrip("\n")
+        exp_comp = expected.rstrip("\n")
+
+        ignore_space = getattr(tc, "ignore_space", True) if not isinstance(tc, dict) else tc.get("ignore_space", True)
+        if ignore_space:
+            actual_comp = "\n".join(line.rstrip() for line in actual_comp.strip().splitlines())
+            exp_comp = "\n".join(line.rstrip() for line in exp_comp.strip().splitlines())
+
+        ignore_case = getattr(tc, "ignore_case", False) if not isinstance(tc, dict) else tc.get("ignore_case", False)
+        if ignore_case:
+            actual_comp = actual_comp.lower()
+            exp_comp = exp_comp.lower()
+
+        tolerance = getattr(tc, "numeric_tolerance", 0.0) if not isinstance(tc, dict) else tc.get("numeric_tolerance", 0.0)
+        try:
+            tol = float(tolerance or 0.0)
+        except (ValueError, TypeError):
+            tol = 0.0
+
+        if tol > 0.0:
+            try:
+                return abs(float(actual_comp) - float(exp_comp)) <= tol
+            except ValueError:
+                return actual_comp == exp_comp
+        
+        return actual_comp == exp_comp
 
 @frappe.whitelist()
 def evaluate_code(problem_id: str, source_code: str, language: str, mode: str = "practice", user: str = None) -> dict:
@@ -43,7 +96,6 @@ def evaluate_code(problem_id: str, source_code: str, language: str, mode: str = 
     if mode == "practice_sample_only":
         eval_tcs = [tc for tc in all_tcs if tc.is_public]
     else:
-        # In both Practice submit and Exam mode, evaluate against all testcases
         eval_tcs = all_tcs
 
     results = []
@@ -84,52 +136,13 @@ def evaluate_code(problem_id: str, source_code: str, language: str, mode: str = 
             overall_status = "Time Limit Exceeded"
             first_error = "Time Limit Exceeded"
         else:
-            # Evaluate Output
-            if tc.mode == "regex" and tc.expected_regex:
-                flags = 0
-                f_str = (tc.regex_flags or "").upper()
-                if "IGNORECASE" in f_str:
-                    flags |= re.IGNORECASE
-                if "MULTILINE" in f_str:
-                    flags |= re.MULTILINE
-
-                try:
-                    pattern = re.compile(tc.expected_regex.strip(), flags)
-                    if tc.match_mode == "fullmatch":
-                        passed = bool(pattern.fullmatch(stdout))
-                    else:
-                        passed = bool(pattern.search(stdout))
-                except re.error as e:
-                    passed = False
-                    first_error = f"Regex Evaluation Error: {str(e)}"
-            else:
-                expected = (tc.expected_output or "").rstrip("\n")
-                actual_comp = stdout
-                exp_comp = expected
-
-                if tc.ignore_space:
-                    actual_comp = "\n".join(line.rstrip() for line in actual_comp.strip().splitlines())
-                    exp_comp = "\n".join(line.rstrip() for line in exp_comp.strip().splitlines())
-
-                if tc.ignore_case:
-                    actual_comp = actual_comp.lower()
-                    exp_comp = exp_comp.lower()
-
-                # Numeric Tolerance Check
-                tol = float(tc.numeric_tolerance or 0.0)
-                if tol > 0.0:
-                    try:
-                        passed = abs(float(actual_comp) - float(exp_comp)) <= tol
-                    except ValueError:
-                        passed = (actual_comp == exp_comp)
-                else:
-                    passed = (actual_comp == exp_comp)
+            passed = verify_testcase_match(tc, stdout)
+            if not passed and overall_status == "Accepted":
+                overall_status = "Wrong Answer"
 
         if passed:
             passed_count += 1
             total_score += float(tc.weightage or 0)
-        elif overall_status == "Accepted":
-            overall_status = "Wrong Answer"
 
         is_pub = bool(tc.is_public)
         results.append({
@@ -176,10 +189,141 @@ def evaluate_code(problem_id: str, source_code: str, language: str, mode: str = 
     }
 
 @frappe.whitelist()
+def test_problem_draft(
+    solution_code: str,
+    language: str,
+    testcases,
+    time_limit: float = 2.0,
+    memory_limit: int = 256,
+    whitelist_keywords: str = "",
+    blacklist_keywords: str = ""
+) -> dict:
+    """
+    Interactive test runner for Desk. Executes author's solution code against draft testcases
+    via Judge0 and returns detailed status, time, memory, stdout, and match diffs.
+    """
+    if isinstance(testcases, str):
+        try:
+            testcases = json.loads(testcases)
+        except Exception:
+            testcases = []
+
+    if not solution_code:
+        return {"success": False, "error": "Solution code is required to test problem."}
+
+    if not testcases:
+        return {"success": False, "error": "Please add at least one test case."}
+
+    # Keyword check
+    lower_code = solution_code.lower()
+    if blacklist_keywords:
+        b_list = [k.strip().lower() for k in str(blacklist_keywords).split(",") if k.strip()]
+        for kw in b_list:
+            if re.search(r'\b' + re.escape(kw) + r'\b', lower_code):
+                return {
+                    "success": False,
+                    "status": "Forbidden Keyword",
+                    "error": f"Reference solution violates blacklist: '{kw}' is present.",
+                    "results": []
+                }
+
+    if whitelist_keywords:
+        w_list = [k.strip().lower() for k in str(whitelist_keywords).split(",") if k.strip()]
+        for kw in w_list:
+            if not re.search(r'\b' + re.escape(kw) + r'\b', lower_code):
+                return {
+                    "success": False,
+                    "status": "Mandatory Construct Missing",
+                    "error": f"Reference solution misses whitelist construct: '{kw}'.",
+                    "results": []
+                }
+
+    results = []
+    passed_count = 0
+
+    for idx, tc in enumerate(testcases):
+        stdin = tc.get("input") or ""
+        if tc.get("allow_empty_input"):
+            stdin = ""
+
+        try:
+            t_limit = float(time_limit or 2.0)
+        except (ValueError, TypeError):
+            t_limit = 2.0
+
+        try:
+            m_limit = int(memory_limit or 256) * 1024
+        except (ValueError, TypeError):
+            m_limit = 256 * 1024
+
+        judge_res = submit_to_judge0(
+            source_code=solution_code,
+            language=language,
+            stdin=stdin,
+            cpu_time_limit=t_limit,
+            memory_limit_kb=m_limit
+        )
+
+        stdout = (judge_res.get("stdout") or "").rstrip("\n")
+        stderr = judge_res.get("stderr") or judge_res.get("compile_output") or ""
+        judge_status = judge_res.get("status", {}).get("description", "Unknown")
+        exec_time = judge_res.get("time")
+        exec_memory = judge_res.get("memory")
+
+        mode = tc.get("mode", "normal")
+        exp_output = tc.get("expected_output", "")
+        exp_regex = tc.get("expected_regex", "")
+
+        is_blank_expected = (mode == "normal" and not exp_output) or (mode == "regex" and not exp_regex)
+
+        passed = False
+        status_label = ""
+
+        if stderr:
+            status_label = "Compilation Error" if "compile" in judge_status.lower() else "Runtime Error"
+            passed = False
+        elif judge_status == "Time Limit Exceeded":
+            status_label = "Time Limit Exceeded"
+            passed = False
+        else:
+            if is_blank_expected:
+                passed = True
+                status_label = "Generated Output"
+            else:
+                passed = verify_testcase_match(tc, stdout)
+                status_label = "Passed" if passed else "Wrong Answer"
+
+        if passed:
+            passed_count += 1
+
+        results.append({
+            "index": idx + 1,
+            "description": tc.get("description") or f"Case {idx + 1}",
+            "input": stdin,
+            "expected_output": exp_output,
+            "expected_regex": exp_regex,
+            "actual_output": stdout,
+            "mode": mode,
+            "passed": passed,
+            "status": status_label,
+            "time": f"{exec_time}s" if exec_time else "-",
+            "memory": f"{exec_memory} KB" if exec_memory else "-",
+            "error": stderr,
+            "is_blank_expected": is_blank_expected
+        })
+
+    all_passed = (passed_count == len(results))
+    return {
+        "success": True,
+        "all_passed": all_passed,
+        "total_testcases": len(results),
+        "passed_count": passed_count,
+        "results": results
+    }
+
+@frappe.whitelist()
 def generate_output_from_solution(problem_id: str, testcase_input: str) -> dict:
-    """
-    Auto-generates expected output by executing the author's Solution Code via Judge0.
-    """
+    """Auto-generates expected output by executing the author's Solution Code via Judge0."""
     problem = frappe.get_doc("Coding Problem", problem_id)
     if not problem.solution_code:
         return {"success": False, "error": "No solution code defined for this problem."}

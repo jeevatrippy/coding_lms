@@ -61,7 +61,8 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Primary Language",
-   "options": "python\ncpp\nc\njava\njavascript"
+   "options": "python\ncpp\nc\njava\njavascript\ntypescript\ngo\nrust\ncsharp\nphp\nruby\nkotlin\nswift\nsql\nbash\nr\nscala\nperl\nhaskell\nlua",
+   "description": "Programming language for solution code, templates, and compiler execution."
   },
   {
    "fieldname": "col_break_1",

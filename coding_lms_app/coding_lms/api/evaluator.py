@@ -123,22 +123,50 @@ def evaluate_code(problem_id: str, source_code: str, language: str, mode: str = 
         )
 
         stdout = (judge_res.get("stdout") or "").rstrip("\n")
-        stderr = judge_res.get("stderr") or judge_res.get("compile_output") or ""
-        judge_status = judge_res.get("status", {}).get("description", "Unknown")
+        stderr = (judge_res.get("stderr") or "").strip()
+        compile_output = (judge_res.get("compile_output") or "").strip()
+        message = (judge_res.get("message") or "").strip()
+        status_info = judge_res.get("status") or {}
+        status_id = status_info.get("id", 0)
+        judge_status = status_info.get("description", "Unknown")
 
         passed = False
         actual_output = stdout
+        tc_error = ""
 
-        if stderr:
-            overall_status = "Compilation Error" if "compile" in judge_status.lower() else "Runtime Error"
-            first_error = stderr
-        elif judge_status == "Time Limit Exceeded":
-            overall_status = "Time Limit Exceeded"
-            first_error = "Time Limit Exceeded"
+        # Compilation Error Check
+        if status_id == 6 or compile_output or "compil" in judge_status.lower():
+            overall_status = "Compilation Error"
+            tc_error = compile_output or stderr or message or "Compilation failed"
+            if not first_error:
+                first_error = tc_error
+        # Runtime Error Check
+        elif status_id in (7, 8, 9, 10, 11, 12) or "runtime error" in judge_status.lower():
+            if overall_status == "Accepted":
+                overall_status = "Runtime Error"
+            tc_error = stderr or message or judge_status
+            if not first_error:
+                first_error = tc_error
+        # Time Limit Exceeded
+        elif status_id == 5 or judge_status == "Time Limit Exceeded":
+            if overall_status == "Accepted":
+                overall_status = "Time Limit Exceeded"
+            tc_error = "Time Limit Exceeded"
+            if not first_error:
+                first_error = "Time Limit Exceeded"
+        # Memory Limit Exceeded
+        elif status_id == 4 or judge_status == "Memory Limit Exceeded":
+            if overall_status == "Accepted":
+                overall_status = "Memory Limit Exceeded"
+            tc_error = "Memory Limit Exceeded"
+            if not first_error:
+                first_error = "Memory Limit Exceeded"
         else:
             passed = verify_testcase_match(tc, stdout)
             if not passed and overall_status == "Accepted":
                 overall_status = "Wrong Answer"
+            if stderr:
+                tc_error = stderr
 
         if passed:
             passed_count += 1
@@ -154,9 +182,30 @@ def evaluate_code(problem_id: str, source_code: str, language: str, mode: str = 
             "input": stdin if is_pub else "[Hidden]",
             "expected_output": (tc.expected_output or "") if is_pub else "[Hidden]",
             "actual_output": actual_output if (is_pub or passed) else "[Hidden Actual Output]",
+            "error": tc_error if (is_pub or overall_status == "Compilation Error") else "",
             "execution_time": judge_res.get("time"),
             "memory": judge_res.get("memory")
         })
+
+        # If code failed to compile, remaining test cases will fail identically with Compilation Error
+        if overall_status == "Compilation Error":
+            for rem_idx in range(idx + 1, len(eval_tcs)):
+                rem_tc = eval_tcs[rem_idx]
+                rem_pub = bool(rem_tc.is_public)
+                results.append({
+                    "testcase_index": rem_idx + 1,
+                    "description": rem_tc.description or f"Test Case {rem_idx + 1}",
+                    "is_public": rem_pub,
+                    "status": "failed",
+                    "weightage": float(rem_tc.weightage or 0),
+                    "input": (rem_tc.input or "") if rem_pub else "[Hidden]",
+                    "expected_output": (rem_tc.expected_output or "") if rem_pub else "[Hidden]",
+                    "actual_output": "[Hidden Actual Output]",
+                    "error": first_error if rem_pub else "",
+                    "execution_time": "-",
+                    "memory": "-"
+                })
+            break
 
     # 4. Save Submission Record in Database
     submission_doc = frappe.get_doc({
@@ -200,7 +249,8 @@ def test_problem_draft(
 ) -> dict:
     """
     Interactive test runner for Desk. Executes author's solution code against draft testcases
-    via Judge0 and returns detailed status, time, memory, stdout, and match diffs.
+    via Judge0 and returns detailed status, time, memory, stdout, compilation diagnostics,
+    runtime errors, and match diffs.
     """
     if isinstance(testcases, str):
         try:
@@ -240,6 +290,8 @@ def test_problem_draft(
 
     results = []
     passed_count = 0
+    global_compilation_error = None
+    global_runtime_error = None
 
     for idx, tc in enumerate(testcases):
         stdin = tc.get("input") or ""
@@ -265,8 +317,12 @@ def test_problem_draft(
         )
 
         stdout = (judge_res.get("stdout") or "").rstrip("\n")
-        stderr = judge_res.get("stderr") or judge_res.get("compile_output") or ""
-        judge_status = judge_res.get("status", {}).get("description", "Unknown")
+        stderr = (judge_res.get("stderr") or "").strip()
+        compile_output = (judge_res.get("compile_output") or "").strip()
+        message = (judge_res.get("message") or "").strip()
+        status_info = judge_res.get("status") or {}
+        status_id = status_info.get("id", 0)
+        judge_status = status_info.get("description", "Unknown")
         exec_time = judge_res.get("time")
         exec_memory = judge_res.get("memory")
 
@@ -278,12 +334,36 @@ def test_problem_draft(
 
         passed = False
         status_label = ""
+        error_detail = ""
 
-        if stderr:
-            status_label = "Compilation Error" if "compile" in judge_status.lower() else "Runtime Error"
+        # Compilation Error Check
+        if status_id == 6 or compile_output or "compil" in judge_status.lower():
+            status_label = "Compilation Error"
+            error_detail = compile_output or stderr or message or "Compilation failed"
             passed = False
-        elif judge_status == "Time Limit Exceeded":
+            if not global_compilation_error:
+                global_compilation_error = error_detail
+        # Runtime Error Check (SIGSEGV, SIGFPE, SIGABRT, NZEC, etc.)
+        elif status_id in (7, 8, 9, 10, 11, 12) or "runtime error" in judge_status.lower() or (stderr and not stdout and status_id != 3):
+            status_label = judge_status if "runtime" in judge_status.lower() else f"Runtime Error ({judge_status})"
+            error_detail = stderr or message or judge_status
+            passed = False
+            if not global_runtime_error:
+                global_runtime_error = error_detail
+        # Time Limit Exceeded
+        elif status_id == 5 or judge_status == "Time Limit Exceeded":
             status_label = "Time Limit Exceeded"
+            error_detail = "Time Limit Exceeded"
+            passed = False
+        # Memory Limit Exceeded
+        elif status_id == 4 or judge_status == "Memory Limit Exceeded":
+            status_label = "Memory Limit Exceeded"
+            error_detail = "Memory Limit Exceeded"
+            passed = False
+        # Sandbox or Internal Error
+        elif status_id == 13 or "internal" in judge_status.lower():
+            status_label = judge_status
+            error_detail = stderr or message or "Sandbox Error"
             passed = False
         else:
             if is_blank_expected:
@@ -292,6 +372,8 @@ def test_problem_draft(
             else:
                 passed = verify_testcase_match(tc, stdout)
                 status_label = "Passed" if passed else "Wrong Answer"
+            if stderr:
+                error_detail = stderr
 
         if passed:
             passed_count += 1
@@ -308,9 +390,34 @@ def test_problem_draft(
             "status": status_label,
             "time": f"{exec_time}s" if exec_time else "-",
             "memory": f"{exec_memory} KB" if exec_memory else "-",
-            "error": stderr,
+            "error": error_detail,
+            "compile_output": compile_output,
+            "stderr": stderr,
             "is_blank_expected": is_blank_expected
         })
+
+        # If compilation failed on this testcase, all subsequent testcases will fail with the exact same error
+        if status_label == "Compilation Error":
+            for rem_idx in range(idx + 1, len(testcases)):
+                rem_tc = testcases[rem_idx]
+                results.append({
+                    "index": rem_idx + 1,
+                    "description": rem_tc.get("description") or f"Case {rem_idx + 1}",
+                    "input": rem_tc.get("input") or "",
+                    "expected_output": rem_tc.get("expected_output", ""),
+                    "expected_regex": rem_tc.get("expected_regex", ""),
+                    "actual_output": "",
+                    "mode": rem_tc.get("mode", "normal"),
+                    "passed": False,
+                    "status": "Compilation Error",
+                    "time": "-",
+                    "memory": "-",
+                    "error": error_detail,
+                    "compile_output": compile_output,
+                    "stderr": stderr,
+                    "is_blank_expected": False
+                })
+            break
 
     all_passed = (passed_count == len(results))
     return {
@@ -318,6 +425,8 @@ def test_problem_draft(
         "all_passed": all_passed,
         "total_testcases": len(results),
         "passed_count": passed_count,
+        "compilation_error": global_compilation_error,
+        "runtime_error": global_runtime_error,
         "results": results
     }
 
@@ -335,9 +444,12 @@ def generate_output_from_solution(problem_id: str, testcase_input: str) -> dict:
     )
 
     stdout = (res.get("stdout") or "").rstrip("\n")
-    stderr = res.get("stderr") or res.get("compile_output") or ""
+    compile_output = (res.get("compile_output") or "").strip()
+    stderr = (res.get("stderr") or "").strip()
+    message = (res.get("message") or "").strip()
 
-    if stderr:
-        return {"success": False, "error": stderr}
+    err = compile_output or stderr or message
+    if err:
+        return {"success": False, "error": err}
 
     return {"success": True, "output": stdout}

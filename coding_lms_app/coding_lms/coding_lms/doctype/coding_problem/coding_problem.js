@@ -402,65 +402,129 @@ function run_problem_test_suite(frm) {
 
 function render_test_results_dialog(frm, res) {
     const passed = res.all_passed;
-    const banner_color = passed ? '#d4edda' : '#f8d7da';
-    const banner_text_color = passed ? '#155724' : '#721c24';
-    const banner_border = passed ? '#c3e6cb' : '#f5c6cb';
+    const has_compile_err = !!res.compilation_error;
+    const has_runtime_err = !!res.runtime_error;
+
+    let banner_color = passed ? '#d4edda' : '#f8d7da';
+    let banner_text_color = passed ? '#155724' : '#721c24';
+    let banner_border = passed ? '#c3e6cb' : '#f5c6cb';
+    let badge_status_text = passed ? 'VALIDATED' : (has_compile_err ? 'COMPILATION ERROR' : (has_runtime_err ? 'RUNTIME ERROR' : 'ISSUES DETECTED'));
     const icon = passed ? '&#10004;' : '&#10008;';
 
     let html = `
-        <div style="background-color: ${banner_color}; color: ${banner_text_color}; border: 1px solid ${banner_border}; border-radius: 8px; padding: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+        <div style="background-color: ${banner_color}; color: ${banner_text_color}; border: 1px solid ${banner_border}; border-radius: 8px; padding: 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
             <div>
                 <h4 style="margin: 0; font-weight: bold;">
                     ${icon} ` + (passed ? 'All ' + res.passed_count + '/' + res.total_testcases + ' Test Cases PASSED!' : res.passed_count + '/' + res.total_testcases + ' Test Cases Passed') + `
                 </h4>
                 <p style="margin: 4px 0 0 0; font-size: 13px; opacity: 0.9;">
-                    Compiler: Judge0 Sandboxed Execution &bull; Language: ${frm.doc.language || 'python'}
+                    Compiler: Judge0 Sandboxed Execution &bull; Language: ${frappe_escape(frm.doc.language || 'c')}
                 </p>
             </div>
             <div>
-                <span class="badge ${passed ? 'badge-success' : 'badge-danger'}" style="font-size: 14px; padding: 6px 12px;">
-                    ${passed ? 'VALIDATED' : 'ISSUES DETECTED'}
+                <span class="badge ${passed ? 'badge-success' : 'badge-danger'}" style="font-size: 13px; padding: 6px 12px; font-weight: 600;">
+                    ${badge_status_text}
                 </span>
             </div>
         </div>
+    `;
 
+    if (has_compile_err) {
+        html += `
+            <div style="background-color: #fff5f5; border: 1px solid #feb2b2; border-left: 5px solid #e53e3e; border-radius: 6px; padding: 14px 16px; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <span style="font-weight: 700; color: #9b2c2c; font-size: 13.5px;">
+                        &#9888; Compilation / Build Error (GCC / Clang Output)
+                    </span>
+                    <span class="badge badge-danger" style="font-size: 10.5px; padding: 3px 8px;">BUILD FAILED</span>
+                </div>
+                <div style="font-size: 12px; color: #742a2a; margin-bottom: 8px;">
+                    The solution failed to compile. Inspect the compiler diagnostic messages and line numbers below:
+                </div>
+                <pre style="background: #1a202c; color: #fc8181; border: 1px solid #2d3748; border-radius: 5px; padding: 12px; font-family: 'Consolas', 'Courier New', monospace; font-size: 11.5px; max-height: 220px; overflow-y: auto; white-space: pre-wrap; margin-bottom: 0;">` + frappe_escape(res.compilation_error) + `</pre>
+            </div>
+        `;
+    } else if (has_runtime_err) {
+        html += `
+            <div style="background-color: #fffaf0; border: 1px solid #feebc8; border-left: 5px solid #dd6b20; border-radius: 6px; padding: 14px 16px; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <span style="font-weight: 700; color: #9c4221; font-size: 13.5px;">
+                        &#9888; Runtime Error (Exception / Signal)
+                    </span>
+                    <span class="badge badge-warning" style="font-size: 10.5px; padding: 3px 8px;">RUNTIME ERROR</span>
+                </div>
+                <div style="font-size: 12px; color: #7b341e; margin-bottom: 8px;">
+                    An unexpected crash or non-zero exit status occurred during execution:
+                </div>
+                <pre style="background: #1a202c; color: #fbd38d; border: 1px solid #2d3748; border-radius: 5px; padding: 12px; font-family: 'Consolas', 'Courier New', monospace; font-size: 11.5px; max-height: 180px; overflow-y: auto; white-space: pre-wrap; margin-bottom: 0;">` + frappe_escape(res.runtime_error) + `</pre>
+            </div>
+        `;
+    }
+
+    html += `
         <div style="max-height: 480px; overflow-y: auto;">
             <table class="table table-bordered table-hover" style="font-size: 12px; margin-bottom: 0;">
                 <thead style="background: #f8f9fa;">
                     <tr>
-                        <th style="width: 50px;">#</th>
-                        <th>Description / Mode</th>
-                        <th style="width: 110px;">Status</th>
-                        <th style="width: 80px;">Time</th>
-                        <th style="width: 90px;">Memory</th>
-                        <th>Actual Output (stdout)</th>
+                        <th style="width: 45px; text-align: center;">#</th>
+                        <th style="min-width: 140px;">Description / Mode</th>
+                        <th style="width: 120px; text-align: center;">Status</th>
+                        <th style="width: 75px; text-align: center;">Time</th>
+                        <th style="width: 85px; text-align: center;">Memory</th>
+                        <th style="min-width: 250px;">Actual Output (stdout) & Errors</th>
                     </tr>
                 </thead>
                 <tbody>
     `;
 
     res.results.forEach((r, i) => {
-        const badge_class = r.passed ? 'badge-success' : 'badge-danger';
+        let badge_class = 'badge-danger';
+        if (r.passed) {
+            badge_class = 'badge-success';
+        } else if (r.status && (r.status.includes('Compilation') || r.status.includes('Compile'))) {
+            badge_class = 'badge-danger';
+        } else if (r.status && r.status.includes('Runtime')) {
+            badge_class = 'badge-warning';
+        } else if (r.status && r.status.includes('Time Limit')) {
+            badge_class = 'badge-secondary';
+        }
+
         const expected_label = r.mode === 'regex' ? 'Regex: ' + (r.expected_regex || '(none)') : 'Expected: ' + (r.expected_output || '(blank)');
         
         html += `
             <tr style="${!r.passed ? 'background-color: #fff8f8;' : ''}">
-                <td><strong>${r.index}</strong></td>
+                <td style="text-align: center;"><strong>${r.index}</strong></td>
                 <td>
-                    <div style="font-weight: 600;">` + frappe_escape(r.description) + `</div>
-                    <div style="color: #6c757d; font-size: 11px;">
-                        Mode: <span class="badge badge-light" style="border: 1px solid #ddd;">${r.mode.toUpperCase()}</span>
+                    <div style="font-weight: 600; color: #2d3748;">` + frappe_escape(r.description) + `</div>
+                    <div style="color: #718096; font-size: 11px; margin-top: 2px;">
+                        Mode: <span class="badge badge-light" style="border: 1px solid #cbd5e0; font-size: 10px;">${frappe_escape(r.mode.toUpperCase())}</span>
                     </div>
                 </td>
-                <td>
-                    <span class="badge ${badge_class}">${r.status}</span>
+                <td style="text-align: center;">
+                    <span class="badge ${badge_class}" style="font-size: 11px; padding: 4px 8px;">${frappe_escape(r.status)}</span>
                 </td>
-                <td style="font-family: monospace;">${r.time}</td>
-                <td style="font-family: monospace;">${r.memory}</td>
+                <td style="font-family: monospace; text-align: center;">${r.time}</td>
+                <td style="font-family: monospace; text-align: center;">${r.memory}</td>
                 <td>
-                    <pre style="margin: 0; padding: 4px 8px; font-size: 11px; background: #fdfdfd; border: 1px solid #eee; border-radius: 4px; max-height: 80px; overflow-y: auto;">` + frappe_escape(r.actual_output || '(no output)') + `</pre>
-                    ${r.error ? '<div class="text-danger" style="font-size: 11px; margin-top: 4px;"><strong>Error:</strong> ' + frappe_escape(r.error) + '</div>' : ''}
-                    <div style="font-size: 10px; color: #888; margin-top: 2px;">` + frappe_escape(expected_label) + `</div>
+                    ${r.actual_output ? `
+                        <div style="font-size: 10px; font-weight: bold; color: #4a5568; margin-bottom: 2px;">STDOUT:</div>
+                        <pre style="margin: 0 0 6px 0; padding: 6px 8px; font-size: 11px; background: #fdfdfd; border: 1px solid #e2e8f0; border-radius: 4px; max-height: 90px; overflow-y: auto; white-space: pre-wrap;">` + frappe_escape(r.actual_output) + `</pre>
+                    ` : (has_compile_err ? `
+                        <div style="color: #a0aec0; font-style: italic; font-size: 11px; margin-bottom: 4px;">(No stdout: compilation failed)</div>
+                    ` : `
+                        <div style="color: #a0aec0; font-style: italic; font-size: 11px; margin-bottom: 4px;">(no stdout output)</div>
+                    `)}
+                    
+                    ${r.error ? `
+                        <div style="margin: 4px 0; padding: 6px 8px; background: #fff5f5; border: 1px solid #feb2b2; border-radius: 4px;">
+                            <div style="font-size: 10px; font-weight: bold; color: #9b2c2c;">ERROR / STDERR:</div>
+                            <pre style="margin: 2px 0 0 0; padding: 0; background: transparent; border: none; font-size: 11px; color: #9b2c2c; max-height: 120px; overflow-y: auto; white-space: pre-wrap; font-family: monospace;">` + frappe_escape(r.error) + `</pre>
+                        </div>
+                    ` : ''}
+                    
+                    <div style="font-size: 10.5px; color: #718096; margin-top: 4px;">
+                        <strong>Expected:</strong> <code style="font-size: 11px; background: #edf2f7; color: #2d3748; padding: 2px 5px; border-radius: 3px;">` + frappe_escape(expected_label) + `</code>
+                    </div>
                 </td>
             </tr>
         `;

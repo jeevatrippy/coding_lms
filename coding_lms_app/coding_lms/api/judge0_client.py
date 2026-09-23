@@ -1,3 +1,4 @@
+import base64
 import requests
 import frappe
 
@@ -76,8 +77,7 @@ def get_language_id(language: str) -> int:
 
 @frappe.whitelist()
 def get_supported_languages() -> list:
-    """Returns list of all supported languages with IDs
-    and display labels."""
+    """Returns list of all supported languages with IDs and display labels."""
     url = get_judge0_url() + "/languages"
     try:
         response = requests.get(url, timeout=5)
@@ -88,6 +88,25 @@ def get_supported_languages() -> list:
 
     return [{"id": v, "name": k.capitalize()} for k, v in JUDGE0_LANGUAGES.items()]
 
+def _b64_encode(val) -> str:
+    if val is None:
+        return ""
+    if isinstance(val, str):
+        return base64.b64encode(val.encode("utf-8")).decode("ascii")
+    if isinstance(val, (bytes, bytearray)):
+        return base64.b64encode(val).decode("ascii")
+    return base64.b64encode(str(val).encode("utf-8")).decode("ascii")
+
+def _b64_decode(val) -> str:
+    if not val:
+        return ""
+    try:
+        if isinstance(val, str):
+            return base64.b64decode(val.encode("ascii")).decode("utf-8", errors="replace")
+        return base64.b64decode(val).decode("utf-8", errors="replace")
+    except Exception:
+        return str(val)
+
 def submit_to_judge0(
     source_code: str,
     language: str,
@@ -96,16 +115,17 @@ def submit_to_judge0(
     memory_limit_kb: int = 256000
 ) -> dict:
     """
-    Submits source code to the sandboxed Judge0 compiler microservice.
-    Returns dictionary with stdout, stderr, status, time, and memory.
+    Submits source code to the sandboxed Judge0 compiler microservice with base64 encoding
+    to reliably support compiler diagnostics, warnings, and non-ASCII character outputs.
+    Returns dictionary with stdout, stderr, compile_output, message, status, time, and memory.
     """
-    url = get_judge0_url() + "/submissions?wait=true"
+    url = get_judge0_url() + "/submissions?wait=true&base64_encoded=true"
     lang_id = get_language_id(language)
 
     payload = {
-        "source_code": source_code,
+        "source_code": _b64_encode(source_code),
         "language_id": lang_id,
-        "stdin": stdin or "",
+        "stdin": _b64_encode(stdin or ""),
         "cpu_time_limit": float(cpu_time_limit or 2.0),
         "memory_limit": int(memory_limit_kb or 256000)
     }
@@ -115,11 +135,20 @@ def submit_to_judge0(
     try:
         response = requests.post(url, json=payload, headers=headers, timeout=15)
         response.raise_for_status()
-        return response.json()
+        raw = response.json()
+        decoded = dict(raw)
+        for key in ("stdout", "stderr", "compile_output", "message"):
+            if raw.get(key):
+                decoded[key] = _b64_decode(raw[key])
+            else:
+                decoded[key] = ""
+        return decoded
     except requests.exceptions.Timeout:
         return {
             "stdout": "",
             "stderr": "Execution timed out contacting compiler sandbox.",
+            "compile_output": "",
+            "message": "Timeout Error",
             "status": {"id": 13, "description": "Timeout Error"},
             "time": None,
             "memory": None
@@ -129,6 +158,8 @@ def submit_to_judge0(
         return {
             "stdout": "",
             "stderr": "Compiler Service Error: " + str(e),
+            "compile_output": "",
+            "message": str(e),
             "status": {"id": 13, "description": "Internal Error"},
             "time": None,
             "memory": None

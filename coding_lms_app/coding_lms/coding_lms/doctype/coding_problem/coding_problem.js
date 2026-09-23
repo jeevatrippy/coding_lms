@@ -10,184 +10,214 @@ frappe.ui.form.on('Coding Problem', {
             run_problem_test_suite(frm);
         }).addClass('btn-success');
 
-        // 3. Auto-generate outputs under Actions menu
+        // 3. Copy AI Master Prompt Button
+        frm.add_custom_button(__('Copy AI Prompt'), function() {
+            copy_ai_prompt_to_clipboard();
+        });
+
+        // 4. Preview Student Editor Views (Approach A vs B)
+        frm.add_custom_button(__('Student View Preview'), function() {
+            open_student_view_preview(frm);
+        }, __('Actions'));
+
+        // 5. Auto-generate outputs under Actions menu
         frm.add_custom_button(__('Auto-Generate Outputs'), function() {
             auto_generate_testcase_outputs(frm);
         }, __('Actions'));
     }
 });
 
-// Sample JSON Templates
-const SAMPLE_TEMPLATES = {
-    'standard_python': {
-        title: "Two Sum",
-        difficulty: "Easy",
-        language: "python",
-        timer: 20,
-        time_limit: 2.0,
-        memory_limit: 256,
-        content: "Given an array of integers `nums` and an integer `target`, return indices of the two numbers such that they add up to target.\n\nYou may assume each input has exactly one solution.",
-        input_format: "First line: space-separated integers nums.\nSecond line: target integer.",
-        output_format: "Two indices separated by space.",
-        constraints: "2 <= nums.length <= 10^4\n-10^9 <= nums[i] <= 10^9",
-        expected_time_complexity: "O(n)",
-        expected_space_complexity: "O(n)",
-        starter_code: "def two_sum(nums, target):\n    # Write your solution here\n    pass\n\nif __name__ == '__main__':\n    nums = list(map(int, input().split()))\n    target = int(input())\n    res = two_sum(nums, target)\n    print(f'{res[0]} {res[1]}')\n",
-        solution_code: "def two_sum(nums, target):\n    lookup = {}\n    for i, num in enumerate(nums):\n        diff = target - num\n        if diff in lookup:\n            return [lookup[diff], i]\n        lookup[num] = i\n    return []\n\nif __name__ == '__main__':\n    nums = list(map(int, input().split()))\n    target = int(input())\n    res = two_sum(nums, target)\n    print(f'{res[0]} {res[1]}')\n",
-        whitelist_keywords: "",
-        blacklist_keywords: "",
-        testcases: [
-            {
-                description: "Sample 1",
-                input: "2 7 11 15\n9",
-                expected_output: "0 1",
-                weightage: 20,
-                is_public: 1,
-                mode: "normal",
-                ignore_space: 1
-            },
-            {
-                description: "Sample 2 (Adjacent)",
-                input: "3 2 4\n6",
-                expected_output: "1 2",
-                weightage: 40,
-                is_public: 1,
-                mode: "normal",
-                ignore_space: 1
-            },
-            {
-                description: "Hidden Case (Large numbers)",
-                input: "1000 2000 3000 4000\n7000",
-                expected_output: "2 3",
-                weightage: 40,
-                is_public: 0,
-                mode: "normal",
-                ignore_space: 1
-            }
-        ]
-    },
-    'regex_parser': {
-        title: "Command Calculator (Regex Match)",
-        difficulty: "Medium",
-        language: "python",
-        timer: 30,
-        time_limit: 2.0,
-        memory_limit: 256,
-        content: "Parse commands from stdin in the format `SUM <n1> <n2>` or `MUL <n1> <n2>`. Output `Sum: <res>` or `Product: <res>`. Print `Invalid` otherwise.",
-        input_format: "Lines of text commands.",
-        output_format: "Formatted calculation result.",
-        constraints: "Numbers are non-negative integers.",
-        expected_time_complexity: "O(1)",
-        expected_space_complexity: "O(1)",
-        starter_code: "import sys\nimport re\n\n# Implement command parser\n",
-        solution_code: "import sys\nimport re\n\nfor line in sys.stdin:\n    line = line.strip()\n    if not line: continue\n    m = re.fullmatch(r'^(SUM|MUL)\\s+(\\d+)\\s+(\\d+)$', line)\n    if m:\n        op, a, b = m.groups()\n        if op == 'SUM':\n            print(f'Sum: {int(a)+int(b)}')\n        else:\n            print(f'Product: {int(a)*int(b)}')\n    else:\n        print('Invalid')\n",
-        whitelist_keywords: "re",
-        blacklist_keywords: "eval, exec",
-        testcases: [
-            {
-                description: "Sum Command",
-                input: "SUM 10 20",
-                expected_regex: "^Sum:\\s*30$",
-                match_mode: "fullmatch",
-                weightage: 25,
-                is_public: 1,
-                mode: "regex"
-            },
-            {
-                description: "Mul Command",
-                input: "MUL 5 6",
-                expected_regex: "^Product:\\s*30$",
-                match_mode: "fullmatch",
-                weightage: 25,
-                is_public: 1,
-                mode: "regex"
-            },
-            {
-                description: "Invalid Command",
-                input: "DIV 10 2",
-                expected_regex: "^Invalid$",
-                match_mode: "fullmatch",
-                weightage: 25,
-                is_public: 1,
-                mode: "regex"
-            },
-            {
-                description: "Hidden Edge Case",
-                input: "SUM 0 0",
-                expected_regex: "^Sum:\\s*0$",
-                match_mode: "fullmatch",
-                weightage: 25,
-                is_public: 0,
-                mode: "regex"
-            }
-        ]
-    },
-    'tolerance_float': {
-        title: "Circle Area with Numeric Tolerance",
-        difficulty: "Easy",
-        language: "python",
-        timer: 15,
-        time_limit: 2.0,
-        memory_limit: 256,
-        content: "Given radius `r`, calculate and print the area of the circle (pi * r^2). Answers within 0.01 tolerance are accepted.",
-        input_format: "A single float r.",
-        output_format: "Area of the circle.",
-        constraints: "0 <= r <= 1000",
-        expected_time_complexity: "O(1)",
-        expected_space_complexity: "O(1)",
-        starter_code: "import math\nr = float(input())\n# Output area\n",
-        solution_code: "import math\nr = float(input())\nprint(math.pi * r * r)\n",
-        testcases: [
-            {
-                description: "Radius 1",
-                input: "1.0",
-                expected_output: "3.14159",
-                weightage: 50,
-                is_public: 1,
-                mode: "normal",
-                numeric_tolerance: 0.01
-            },
-            {
-                description: "Radius 5",
-                input: "5.0",
-                expected_output: "78.5398",
-                weightage: 50,
-                is_public: 1,
-                mode: "normal",
-                numeric_tolerance: 0.01
-            }
-        ]
+const MASTER_AI_PROMPT = "You are an expert competitive programming problem architect and JSON generator for an online Judge0 coding platform.\n\nI will provide input in one of two formats:\n- FORMAT A: Just the problem title and description.\n- FORMAT B: Problem title, description, code snippets, skeleton, and test cases.\n\nYour task is to return ONLY a single, valid, raw JSON object (strictly NO markdown backticks, NO markdown formatting around the JSON, NO explanations, NO introductory or concluding text).\n\n### APPROACH A vs APPROACH B (STUDENT CODE EDITOR MODES):\n1. APPROACH A (Competitive Programming / Full Boilerplate):\n   - The student sees \"starter_code\" containing the complete file (imports, function stub, and main() driver reading stdin and printing stdout).\n   - Use this when testing I/O handling, low-level pointers, or full program compilation.\n2. APPROACH B (LeetCode / Function-Only Mode):\n   - The student sees \"skeleton_code\" containing ONLY the clean function or class signature (no main, no scanf/cin, no print).\n   - Behind the scenes, the driver wraps this function when submitting to Judge0.\n   - Use this for algorithmic puzzles, LeetCode style problems, and clean logic evaluations.\n\n### STRICT JSON SYNTAX RULES:\n1. Double Quotes Inside Code: Any double quotes inside string fields (like printf(\\\"%d\\\"), scanf(\\\"%d %d\\\"), puts(\\\"\\\"), print(\\\"Hello\\\")) MUST BE STRICTLY ESCAPED AS \\\\\". Never leave unescaped raw double quotes inside JSON code strings.\n2. C Null Terminator: In C strings, write null terminator as '\\\\\\\\0' (double backslash), not '\\\\0'.\n3. Newlines and Tabs: Encode newlines as \\\\n and tabs as \\\\t.\n4. Regex Output: Whenever an output has formatted labels, prefixes, or punctuation (e.g. 'Sum: 40', 'Status: OK'), set mode='regex', expected_regex='^Label:\\\\\\\\s*pattern$', and match_mode='fullmatch'.\n\n### STRICT JSON OUTPUT SCHEMA:\n{\n  \"title\": \"<Problem Title>\",\n  \"difficulty\": \"<Easy | Medium | Hard>\",\n  \"language\": \"<python | java | cpp | c | javascript | typescript | go | rust | csharp | php | ruby | kotlin | swift | sql | bash>\",\n  \"code_editor_mode\": \"<Competitive Mode (Full Code with main & stdin) | LeetCode Mode (Pure Function Signature only)>\",\n  \"timer\": 20,\n  \"time_limit\": 2.0,\n  \"memory_limit\": 256,\n  \"content\": \"<Problem statement in clean Markdown with rules and examples>\",\n  \"input_format\": \"<Explanation of standard input lines>\",\n  \"output_format\": \"<Explanation of expected standard output>\",\n  \"constraints\": \"<Mathematical bounds, e.g. 1 <= N <= 10^5>\",\n  \"expected_time_complexity\": \"<e.g. O(N)>\",\n  \"expected_space_complexity\": \"<e.g. O(1)>\",\n  \"skeleton_code\": \"<Pure function signature only (Approach B / LeetCode style)>\",\n  \"starter_code\": \"<Full runnable code with main() and stdin/stdout (Approach A / Competitive style)>\",\n  \"solution_code\": \"<Complete optimal solution that compiles and passes in Judge0>\",\n  \"whitelist_keywords\": \"<Optional comma-separated mandatory constructs, or empty>\",\n  \"blacklist_keywords\": \"<Optional comma-separated forbidden words like 'eval, exec', or empty>\",\n  \"testcases\": [\n    {\n      \"description\": \"<Label for testcase>\",\n      \"input\": \"<stdin string with \\\\n for newlines>\",\n      \"expected_output\": \"<stdout string for normal mode, or empty string if regex>\",\n      \"weightage\": 20,\n      \"is_public\": 1,\n      \"allow_empty_input\": 0,\n      \"mode\": \"<normal | regex>\",\n      \"expected_regex\": \"<regex pattern if mode is regex, otherwise empty string>\",\n      \"match_mode\": \"<fullmatch | search>\",\n      \"regex_flags\": \"<IGNORECASE | MULTILINE | ''>\",\n      \"ignore_space\": 1,\n      \"ignore_case\": 0,\n      \"numeric_tolerance\": 0.0\n    }\n  ]\n}";
+
+function copy_ai_prompt_to_clipboard() {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(MASTER_AI_PROMPT).then(() => {
+            frappe.show_alert({
+                message: __('Master AI Prompt copied to clipboard! Paste it into ChatGPT or Claude.'),
+                indicator: 'green'
+            });
+        }).catch(err => {
+            fallback_copy();
+        });
+    } else {
+        fallback_copy();
     }
-};
+}
+
+function fallback_copy() {
+    const ta = document.createElement('textarea');
+    ta.value = MASTER_AI_PROMPT;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    frappe.show_alert({
+        message: __('Master AI Prompt copied to clipboard!'),
+        indicator: 'green'
+    });
+}
+
+function open_student_view_preview(frm) {
+    const current_mode = frm.doc.code_editor_mode || 'Competitive Mode (Full Code with main & stdin)';
+    const starter_code = frm.doc.starter_code || '// No starter code configured yet.';
+    const skeleton_code = frm.doc.skeleton_code || '// No skeleton signature configured yet.';
+
+    const html = `
+        <div style="margin-bottom: 15px;">
+            <p style="font-size: 13px; color: #555; margin-bottom: 12px;">
+                Choose how students will experience this problem in their editor. You can switch between 
+                <strong>Approach A (Competitive Full Boilerplate)</strong> and <strong>Approach B (LeetCode Function-Only)</strong>.
+            </p>
+            <div class="btn-group" role="group" style="width: 100%; display: flex; margin-bottom: 15px;">
+                <button type="button" class="btn btn-default active" id="btn-tab-approach-a" style="flex: 1; font-weight: 600;">
+                    Approach A: Competitive Mode (Full Code)
+                </button>
+                <button type="button" class="btn btn-default" id="btn-tab-approach-b" style="flex: 1; font-weight: 600;">
+                    Approach B: LeetCode Mode (Function-Only)
+                </button>
+            </div>
+        </div>
+
+        <!-- APPROACH A CONTAINER -->
+        <div id="view-approach-a" style="display: block;">
+            <div style="background: #eef7ff; border-left: 4px solid #2085ec; padding: 12px; border-radius: 4px; margin-bottom: 12px; font-size: 12px;">
+                <strong>What the student sees on screen:</strong> The full program including <code>#include</code>, function signature, and the <code>main()</code> driver with <code>scanf/cin</code> and <code>printf/cout</code>.
+                <br><strong>Best for:</strong> Standard college labs, competitive programming, and pointer/memory manipulation where full I/O control is required.
+            </div>
+            <div style="background: #1e1e1e; color: #d4d4d4; border-radius: 8px; padding: 16px; font-family: monospace; font-size: 12px; max-height: 320px; overflow-y: auto;">
+                <div style="color: #6a9955; margin-bottom: 8px;">// === STUDENT CODE EDITOR (Full Runnable Template) ===</div>
+                <pre style="color: #d4d4d4; background: transparent; border: none; padding: 0; margin: 0; font-family: inherit; font-size: inherit;">` + frappe_escape(starter_code) + `</pre>
+            </div>
+        </div>
+
+        <!-- APPROACH B CONTAINER -->
+        <div id="view-approach-b" style="display: none;">
+            <div style="background: #fdf3e7; border-left: 4px solid #f39c12; padding: 12px; border-radius: 4px; margin-bottom: 12px; font-size: 12px;">
+                <strong>What the student sees on screen:</strong> Only the clean function signature (like LeetCode). The student never deals with <code>scanf</code> or <code>int main()</code>.
+                <br><strong>Best for:</strong> Algorithm interview practice and clean data structures where students focus purely on logic while backend drivers handle inputs.
+            </div>
+            <div style="background: #1e1e1e; color: #d4d4d4; border-radius: 8px; padding: 16px; font-family: monospace; font-size: 12px; max-height: 320px; overflow-y: auto;">
+                <div style="color: #6a9955; margin-bottom: 8px;">// === STUDENT CODE EDITOR (Pure Function Contract) ===</div>
+                <pre style="color: #d4d4d4; background: transparent; border: none; padding: 0; margin: 0; font-family: inherit; font-size: inherit;">` + frappe_escape(skeleton_code) + `</pre>
+            </div>
+        </div>
+    `;
+
+    const dialog = new frappe.ui.Dialog({
+        title: __('Student Editor View Modes (Approach A vs Approach B)'),
+        fields: [
+            {
+                fieldname: 'preview_html',
+                fieldtype: 'HTML',
+                options: html
+            },
+            {
+                fieldname: 'selected_mode',
+                label: __('Apply Mode to this Question'),
+                fieldtype: 'Select',
+                options: [
+                    'Competitive Mode (Full Code with main & stdin)',
+                    'LeetCode Mode (Pure Function Signature only)'
+                ],
+                default: current_mode
+            }
+        ],
+        size: 'large',
+        primary_action_label: __('Save Selected Mode'),
+        primary_action: function(values) {
+            frm.set_value('code_editor_mode', values.selected_mode);
+            dialog.hide();
+            frappe.show_alert({
+                message: __('Student Editor Mode updated to: ' + values.selected_mode),
+                indicator: 'green'
+            });
+        }
+    });
+
+    dialog.show();
+
+    setTimeout(() => {
+        const btnA = document.getElementById('btn-tab-approach-a');
+        const btnB = document.getElementById('btn-tab-approach-b');
+        const viewA = document.getElementById('view-approach-a');
+        const viewB = document.getElementById('view-approach-b');
+
+        if (btnA && btnB) {
+            btnA.onclick = function() {
+                btnA.classList.add('active');
+                btnB.classList.remove('active');
+                viewA.style.display = 'block';
+                viewB.style.display = 'none';
+                dialog.set_value('selected_mode', 'Competitive Mode (Full Code with main & stdin)');
+            };
+
+            btnB.onclick = function() {
+                btnB.classList.add('active');
+                btnA.classList.remove('active');
+                viewA.style.display = 'none';
+                viewB.style.display = 'block';
+                dialog.set_value('selected_mode', 'LeetCode Mode (Pure Function Signature only)');
+            };
+
+            if (current_mode.indexOf('LeetCode') !== -1) {
+                btnB.click();
+            } else {
+                btnA.click();
+            }
+        }
+    }, 200);
+}
+
+function frappe_escape(str) {
+    if (window.frappe && frappe.utils && frappe.utils.escape_html) {
+        return frappe.utils.escape_html(str);
+    }
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function clean_inner_quotes(val) {
+    let s = val.replace(/\\"/g, '___PROTECTED_ESCAPED_QUOTE___');
+    s = s.replace(/"/g, '\\"');
+    s = s.replace(/___PROTECTED_ESCAPED_QUOTE___/g, '\\"');
+    return s;
+}
+function repair_json_text(text) {
+    if (!text) return text;
+    let s = text.replace(/\\0/g, '___ESCAPED_NULL___')
+                .replace(/\0/g, '\\0')
+                .replace(/___ESCAPED_NULL___/g, '\\0');
+
+    const fields = ['starter_code', 'solution_code', 'skeleton_code', 'content'];
+    fields.forEach(f => {
+        const pattern = new RegExp('("' + f + '"\\s*:\\s*")(.*?)("(?=\\s*(?:,\\s*"[a-zA-Z0-9_]+"\\s*:|\\s*})))', 'gs');
+        s = s.replace(pattern, (match, prefix, val, suffix) => {
+            return prefix + clean_inner_quotes(val) + suffix;
+        });
+    });
+    return s;
+}
 
 function open_json_import_dialog(frm) {
     const dialog = new frappe.ui.Dialog({
         title: __('Import Coding Problem from JSON'),
         fields: [
             {
-                fieldname: 'template',
-                label: __('Load Sample Template (Optional)'),
-                fieldtype: 'Select',
-                options: [
-                    '',
-                    'Standard Problem (Python Two Sum)',
-                    'Regex Pattern Matcher (Calculator)',
-                    'Numeric Tolerance (Float Calculation)'
-                ],
-                change: function() {
-                    const val = dialog.get_value('template');
-                    if (val === 'Standard Problem (Python Two Sum)') {
-                        dialog.set_value('json_data', JSON.stringify(SAMPLE_TEMPLATES.standard_python, null, 2));
-                    } else if (val === 'Regex Pattern Matcher (Calculator)') {
-                        dialog.set_value('json_data', JSON.stringify(SAMPLE_TEMPLATES.regex_parser, null, 2));
-                    } else if (val === 'Numeric Tolerance (Float Calculation)') {
-                        dialog.set_value('json_data', JSON.stringify(SAMPLE_TEMPLATES.tolerance_float, null, 2));
-                    }
-                }
+                fieldname: 'prompt_help_html',
+                fieldtype: 'HTML',
+                options: `
+                    <div style="background: #f0f7ff; border: 1px solid #cce5ff; border-radius: 6px; padding: 10px 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-size: 12px; color: #004085;">
+                            Generate problem JSON effortlessly with ChatGPT or Claude.
+                        </span>
+                        <button type="button" class="btn btn-xs btn-primary" id="btn-copy-prompt-inside" style="font-weight: 600;">
+                            Copy Master AI Prompt
+                        </button>
+                    </div>
+                `
             },
             {
                 fieldname: 'json_file',
-                label: __('Or Upload JSON File'),
+                label: __('Upload JSON File (Optional)'),
                 fieldtype: 'Attach',
                 change: function() {
                     const file_url = dialog.get_value('json_file');
@@ -209,7 +239,7 @@ function open_json_import_dialog(frm) {
                 fieldtype: 'Code',
                 options: 'JSON',
                 reqd: 1,
-                description: __('Paste problem JSON here. Supports standard schemas, test cases, and constraints.')
+                description: __('Paste problem JSON here. Supports automatic syntax repair for unescaped code quotes.')
             }
         ],
         size: 'large',
@@ -228,13 +258,12 @@ function open_json_import_dialog(frm) {
                     frappe.msgprint({
                         title: __('Invalid JSON Format'),
                         indicator: 'red',
-                        message: __('Could not parse JSON: ' + e1.message + '<br><br><b>Tip:</b> If your code contains double quotes (like <code>scanf("%s")</code>), they must be escaped as <code>\\"</code>.')
+                        message: __('Could not parse JSON: ' + e1.message + '<br><br><b>Tip:</b> If your code contains double quotes (like <code>scanf("%s")</code>), they must be escaped as <code>\"</code>.')
                     });
                     return;
                 }
             }
 
-            // Populate form fields
             if (data.title) frm.set_value('title', data.title);
             if (data.difficulty) {
                 const diff = data.difficulty.charAt(0).toUpperCase() + data.difficulty.slice(1).toLowerCase();
@@ -243,6 +272,9 @@ function open_json_import_dialog(frm) {
             if (data.language) {
                 const lang = data.language.toLowerCase().replace('python3', 'python').replace('nodejs', 'javascript');
                 frm.set_value('language', lang);
+            }
+            if (data.code_editor_mode) {
+                frm.set_value('code_editor_mode', data.code_editor_mode);
             }
             if (data.timer !== undefined) frm.set_value('timer', data.timer);
             if (data.time_limit !== undefined) {
@@ -256,7 +288,7 @@ function open_json_import_dialog(frm) {
             if (data.constraints) frm.set_value('constraints', data.constraints);
             if (data.expected_time_complexity) frm.set_value('expected_time_complexity', data.expected_time_complexity);
             if (data.expected_space_complexity) frm.set_value('expected_space_complexity', data.expected_space_complexity);
-            if (data.starter_code || data.skeleton_code) frm.set_value('starter_code', data.starter_code || data.skeleton_code);
+            if (data.starter_code) frm.set_value('starter_code', data.starter_code);
             if (data.skeleton_code) frm.set_value('skeleton_code', data.skeleton_code);
             if (data.solution_code || data.code) frm.set_value('solution_code', data.solution_code || data.code);
             
@@ -269,7 +301,6 @@ function open_json_import_dialog(frm) {
                 frm.set_value('whitelist_keywords', wl);
             }
 
-            // Populate Testcases
             const raw_tcs = data.testcases || data.test_cases || [];
             if (Array.isArray(raw_tcs) && raw_tcs.length > 0) {
                 frm.clear_table('testcases');
@@ -293,7 +324,9 @@ function open_json_import_dialog(frm) {
             }
 
             frappe.show_alert({
-                message: __('Problem details and ' + raw_tcs.length + ' test cases successfully imported!'),
+                message: auto_repaired 
+                    ? __('Problem imported successfully (auto-repaired unescaped quotes)!') 
+                    : __('Problem details and ' + raw_tcs.length + ' test cases successfully imported!'),
                 indicator: 'green'
             });
             dialog.hide();
@@ -301,6 +334,15 @@ function open_json_import_dialog(frm) {
     });
 
     dialog.show();
+
+    setTimeout(() => {
+        const btn = document.getElementById('btn-copy-prompt-inside');
+        if (btn) {
+            btn.onclick = function() {
+                copy_ai_prompt_to_clipboard();
+            };
+        }
+    }, 200);
 }
 
 function run_problem_test_suite(frm) {
@@ -369,7 +411,7 @@ function render_test_results_dialog(frm, res) {
         <div style="background-color: ${banner_color}; color: ${banner_text_color}; border: 1px solid ${banner_border}; border-radius: 8px; padding: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
             <div>
                 <h4 style="margin: 0; font-weight: bold;">
-                    ${icon} ${passed ? 'All ' + res.passed_count + '/' + res.total_testcases + ' Test Cases PASSED!' : res.passed_count + '/' + res.total_testcases + ' Test Cases Passed'}
+                    ${icon} ` + (passed ? 'All ' + res.passed_count + '/' + res.total_testcases + ' Test Cases PASSED!' : res.passed_count + '/' + res.total_testcases + ' Test Cases Passed') + `
                 </h4>
                 <p style="margin: 4px 0 0 0; font-size: 13px; opacity: 0.9;">
                     Compiler: Judge0 Sandboxed Execution &bull; Language: ${frm.doc.language || 'python'}
@@ -405,7 +447,7 @@ function render_test_results_dialog(frm, res) {
             <tr style="${!r.passed ? 'background-color: #fff8f8;' : ''}">
                 <td><strong>${r.index}</strong></td>
                 <td>
-                    <div style="font-weight: 600;">${frappe.utils.escape_html(r.description)}</div>
+                    <div style="font-weight: 600;">` + frappe_escape(r.description) + `</div>
                     <div style="color: #6c757d; font-size: 11px;">
                         Mode: <span class="badge badge-light" style="border: 1px solid #ddd;">${r.mode.toUpperCase()}</span>
                     </div>
@@ -416,9 +458,9 @@ function render_test_results_dialog(frm, res) {
                 <td style="font-family: monospace;">${r.time}</td>
                 <td style="font-family: monospace;">${r.memory}</td>
                 <td>
-                    <pre style="margin: 0; padding: 4px 8px; font-size: 11px; background: #fdfdfd; border: 1px solid #eee; border-radius: 4px; max-height: 80px; overflow-y: auto;">${frappe.utils.escape_html(r.actual_output || '(no output)')}</pre>
-                    ${r.error ? '<div class="text-danger" style="font-size: 11px; margin-top: 4px;"><strong>Error:</strong> ' + frappe.utils.escape_html(r.error) + '</div>' : ''}
-                    <div style="font-size: 10px; color: #888; margin-top: 2px;">${frappe.utils.escape_html(expected_label)}</div>
+                    <pre style="margin: 0; padding: 4px 8px; font-size: 11px; background: #fdfdfd; border: 1px solid #eee; border-radius: 4px; max-height: 80px; overflow-y: auto;">` + frappe_escape(r.actual_output || '(no output)') + `</pre>
+                    ${r.error ? '<div class="text-danger" style="font-size: 11px; margin-top: 4px;"><strong>Error:</strong> ' + frappe_escape(r.error) + '</div>' : ''}
+                    <div style="font-size: 10px; color: #888; margin-top: 2px;">` + frappe_escape(expected_label) + `</div>
                 </td>
             </tr>
         `;
@@ -442,7 +484,6 @@ function render_test_results_dialog(frm, res) {
         size: 'large'
     });
 
-    // Check if any test cases had blank outputs that were generated
     const has_blank = res.results.some(r => r.is_blank_expected && r.actual_output);
     if (has_blank) {
         d.set_primary_action(__('Fill Blank Expected Outputs with Judge0 Results'), function() {
@@ -470,29 +511,4 @@ function auto_generate_testcase_outputs(frm) {
         return;
     }
     run_problem_test_suite(frm);
-}
-
-
-function clean_inner_quotes(val) {
-    return val.replace(/\\"/g, '___ESCAPED_QUOTE___')
-              .replace(/"/g, '\\"')
-              .replace(/___ESCAPED_QUOTE___/g, '\\"');
-}
-
-function repair_json_text(text) {
-    if (!text) return text;
-    // 1. Fix unescaped \0 (null byte in C strings)
-    let s = text.replace(/\\\\0/g, '___ESCAPED_NULL___')
-                .replace(/\\0/g, '\\\\0')
-                .replace(/___ESCAPED_NULL___/g, '\\\\0');
-
-    // 2. Fix unescaped double quotes inside code and text fields
-    const fields = ['starter_code', 'solution_code', 'skeleton_code', 'content'];
-    fields.forEach(f => {
-        const pattern = new RegExp('("' + f + '"\\s*:\\s*")(.*?)("(?=\\s*,\\s*"[a-zA-Z0-9_]+"\\s*:))', 'gs');
-        s = s.replace(pattern, (match, prefix, val, suffix) => {
-            return prefix + clean_inner_quotes(val) + suffix;
-        });
-    });
-    return s;
 }

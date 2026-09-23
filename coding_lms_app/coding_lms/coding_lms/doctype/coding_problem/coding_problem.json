@@ -23,6 +23,7 @@
   "expected_time_complexity",
   "expected_space_complexity",
   "section_break_snippets",
+  "code_editor_mode",
   "starter_code",
   "skeleton_code",
   "solution_code",
@@ -129,6 +130,14 @@
    "fieldname": "section_break_snippets",
    "fieldtype": "Section Break",
    "label": "Code Snippets"
+  },
+  {
+   "default": "Competitive Mode (Full Code with main & stdin)",
+   "fieldname": "code_editor_mode",
+   "fieldtype": "Select",
+   "label": "Student Editor View Mode",
+   "options": "Competitive Mode (Full Code with main & stdin)\nLeetCode Mode (Pure Function Signature only)",
+   "description": "Approach A (Competitive): Student gets full boilerplate with main() and stdin/stdout. Approach B (LeetCode): Student sees only the clean function signature."
   },
   {
    "fieldname": "starter_code",

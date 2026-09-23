@@ -176,24 +176,31 @@ function frappe_escape(str) {
 }
 
 function clean_inner_quotes(val) {
-    let s = val.replace(/\\"/g, '___PROTECTED_ESCAPED_QUOTE___');
-    s = s.replace(/"/g, '\\"');
-    s = s.replace(/___PROTECTED_ESCAPED_QUOTE___/g, '\\"');
+    let s = val.replace(/\"/g, '___PROTECTED_ESCAPED_QUOTE___');
+    s = s.replace(/"/g, '\"');
+    s = s.replace(/___PROTECTED_ESCAPED_QUOTE___/g, '\"');
     return s;
 }
 function repair_json_text(text) {
     if (!text) return text;
-    let s = text.replace(/\\0/g, '___ESCAPED_NULL___')
-                .replace(/\0/g, '\\0')
-                .replace(/___ESCAPED_NULL___/g, '\\0');
+    let s = text.replace(/\0/g, '___ESCAPED_NULL___')
+                .replace(/ /g, '\0')
+                .replace(/___ESCAPED_NULL___/g, '\0');
 
+    // 1. Repair unescaped quotes in known code / multiline fields
     const fields = ['starter_code', 'solution_code', 'skeleton_code', 'content'];
     fields.forEach(f => {
-        const pattern = new RegExp('("' + f + '"\\s*:\\s*")(.*?)("(?=\\s*(?:,\\s*"[a-zA-Z0-9_]+"\\s*:|\\s*})))', 'gs');
+        const pattern = new RegExp('("' + f + '"\s*:\s*")(.*?)("(?=\s*(?:,\s*"[a-zA-Z0-9_]+"\s*:|\s*})))', 'gs');
         s = s.replace(pattern, (match, prefix, val, suffix) => {
             return prefix + clean_inner_quotes(val) + suffix;
         });
     });
+
+    // 2. Repair invalid regex escape sequences (e.g. \[5,\s*6\])
+    s = s.replace(/\\/g, '___DOUBLE_BACKSLASH___');
+    s = s.replace(/\([^"\/bfnrtu]|u(?!([0-9a-fA-F]{4})))/g, '\\$1');
+    s = s.replace(/___DOUBLE_BACKSLASH___/g, '\\');
+
     return s;
 }
 
